@@ -2,7 +2,7 @@
 
 An engineering calculator for electronics that understands SI prefixes: `10n * 100k = 1m`.
 
-**Try it:** https://kothf.github.io/Calculator/
+**Try it:** https://kothf.github.io/prefix_calc/
 
 This is an MVP built as a web app (PWA). It runs in the browser on iPhone and Android and can be installed to the home screen. The math core (`src/si.js`) has no UI dependencies, so it can move unchanged into a future native version (React Native/Expo).
 
@@ -18,6 +18,7 @@ This is an MVP built as a web app (PWA). It runs in the browser on iPhone and An
 - Nearest standard value from the E12/E24/E96 series, with the error in percent.
 - History of the last 50 calculations: tap inserts the result, long press inserts the expression. Tap the result to copy it.
 - Custom keypad instead of the system keyboard. Move the cursor by tapping, with ◀ ▶, or by swiping the expression. A hardware keyboard works directly (Enter = `=`, Esc = clear).
+- Haptic feedback on key press: Vibration API on Android, the system switch haptic on iOS 18+ (toggle with the Haptics button).
 - Light and dark themes (pure black for OLED), works offline.
 
 ## Development
@@ -30,7 +31,7 @@ npm run test:e2e  # browser checks of the built app (needs Playwright with Chrom
 
 ## Install on a phone
 
-Every push to `main` deploys the PWA to GitHub Pages: https://kothf.github.io/Calculator/
+Every push to `main` deploys the PWA to GitHub Pages: https://kothf.github.io/prefix_calc/
 
 - iPhone: open the link in Safari → Share → Add to Home Screen.
 - Android: open it in Chrome → menu → Install app.
@@ -51,4 +52,4 @@ After the first launch the app works without internet.
 ## Next steps
 
 - Phase 2 of the spec: RC/LC calculator, X<sub>C</sub>/X<sub>L</sub>, voltage divider picker.
-- Native version (Expo/React Native) with system haptics. On the web, vibration only works on Android.
+- Native version (Expo/React Native) with full system haptics.

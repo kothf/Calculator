@@ -174,7 +174,23 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   var SIG = 4;
 
   // ---------- haptics (Android vibrates; iOS Safari has no web vibration API) ----------
-  function buzz() { if (state.haptic && navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} } }
+  // Android/Chrome: Vibration API. iOS Safari has none, but since iOS 18 toggling an
+  // <input type="checkbox" switch> plays the system haptic tick, so we click a hidden one.
+  var hapticLabel = (function () {
+    if (navigator.vibrate) return null;
+    var label = document.createElement('label'), sw = document.createElement('input');
+    sw.type = 'checkbox'; sw.setAttribute('switch', ''); sw.tabIndex = -1;
+    label.setAttribute('aria-hidden', 'true'); label.style.display = 'none';
+    label.appendChild(sw); document.body.appendChild(label);
+    return label;
+  })();
+  function buzz() {
+    if (!state.haptic) return;
+    try {
+      if (navigator.vibrate) navigator.vibrate(12);
+      else if (hapticLabel) hapticLabel.click();
+    } catch (e) {}
+  }
 
   // ---------- editing at the caret ----------
   function sel() { return { s: input.selectionStart == null ? input.value.length : input.selectionStart, e: input.selectionEnd == null ? input.value.length : input.selectionEnd }; }
