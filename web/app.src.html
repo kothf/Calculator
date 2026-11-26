@@ -39,7 +39,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 
 .history { flex: 1 1 auto; min-height: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;
   justify-content: flex-end; }
-.history:empty::before { content: "История пуста. Нажмите «=», чтобы сохранить расчёт."; color: var(--muted); font-size: 12px; text-align: right; }
+.history:empty::before { content: "No history yet. Press = to save a calculation."; color: var(--muted); font-size: 12px; text-align: right; }
 .h-item { display: flex; justify-content: space-between; gap: 12px; padding: 6px 4px; border-radius: 6px; cursor: pointer;
   font: 400 14px/1.3 var(--mono); }
 .h-item:active { background: var(--key-fn); }
@@ -94,19 +94,19 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   <header>
     <h1>Prefix<b>Calc</b></h1>
     <div class="hdr-btns">
-      <button class="chip" id="hapticBtn" aria-pressed="true" title="Вибрация при нажатии">Вибро</button>
-      <button class="chip" id="clearHist">Очистить историю</button>
+      <button class="chip" id="hapticBtn" aria-pressed="true" title="Vibrate on key press">Haptics</button>
+      <button class="chip" id="clearHist">Clear history</button>
     </div>
   </header>
 
-  <div class="history" id="history" aria-label="История"></div>
+  <div class="history" id="history" aria-label="History"></div>
 
   <section class="display">
-    <input id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Выражение">
+    <input id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Expression">
     <div class="res-row">
-      <button class="eng" id="engL" title="ENG ←: меньшая приставка">‹</button>
-      <div id="result" role="status" title="Нажмите, чтобы скопировать; свайп меняет приставку"></div>
-      <button class="eng" id="engR" title="ENG →: большая приставка">›</button>
+      <button class="eng" id="engL" title="ENG ←: smaller prefix">‹</button>
+      <div id="result" role="status" title="Tap to copy, swipe to change prefix"></div>
+      <button class="eng" id="engR" title="ENG →: larger prefix">›</button>
     </div>
     <div class="alts" id="alts"></div>
     <div class="eser">
@@ -124,16 +124,16 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   </div>
 
   <div class="cursor-row">
-    <button class="key fn small" data-a="left" aria-label="Курсор влево">◀</button>
-    <button class="key fn small" data-a="right" aria-label="Курсор вправо">▶</button>
-    <button class="key fn small" data-i="||" aria-label="Параллельно">A ∥ B</button>
+    <button class="key fn small" data-a="left" aria-label="Cursor left">◀</button>
+    <button class="key fn small" data-a="right" aria-label="Cursor right">▶</button>
+    <button class="key fn small" data-i="||" aria-label="Parallel">A ∥ B</button>
   </div>
 
   <div class="keys">
     <button class="key fn ac" data-a="ac">AC</button>
     <button class="key fn" data-i="(">(</button>
     <button class="key fn" data-i=")">)</button>
-    <button class="key fn" data-a="bs" aria-label="Стереть">⌫</button>
+    <button class="key fn" data-a="bs" aria-label="Backspace">⌫</button>
     <button class="key op" data-i="÷">÷</button>
 
     <button class="key fn" data-i="√">√</button>
@@ -151,11 +151,11 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <button class="key fn" data-i="π">π</button>
     <button class="key" data-i="0">0</button>
     <button class="key" data-i=".">.</button>
-    <button class="key fn" data-i="R" title="Десятичная метка RKM: 4R7 = 4.7">R</button>
+    <button class="key fn" data-i="R" title="RKM decimal mark: 4R7 = 4.7">R</button>
     <button class="key eq" data-a="eq">=</button>
   </div>
 </div>
-<div class="toast" id="toast">Скопировано</div>
+<div class="toast" id="toast">Copied</div>
 
 <script>
 /*__SI_JS__*/
@@ -213,7 +213,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
       SI.alternatives(v, e3, SIG).forEach(function (a) { var s = document.createElement('span'); s.textContent = a; altsEl.appendChild(s); });
       var ne = SI.nearestE(v, state.series);
       if (ne) {
-        var pct = ne.errorPct, ps = Math.abs(pct) < 0.05 ? 'точно' : (pct >= 0 ? '+' : '−') + Math.abs(pct).toFixed(Math.abs(pct) < 10 ? 1 : 0) + '%';
+        var pct = ne.errorPct, ps = Math.abs(pct) < 0.05 ? 'exact' : (pct >= 0 ? '+' : '−') + Math.abs(pct).toFixed(Math.abs(pct) < 10 ? 1 : 0) + '%';
         evalEl.innerHTML = '';
         evalEl.appendChild(document.createTextNode(state.series + ': ' + ne.label + ' '));
         var sp = document.createElement('span'); sp.className = 'pct'; sp.textContent = '(' + ps + ')'; evalEl.appendChild(sp);
@@ -222,7 +222,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
       state.value = null;
       if (e.code === 'incomplete') { resultEl.className = 'idle'; resultEl.textContent = '…'; return; }
       resultEl.className = 'err';
-      resultEl.textContent = e.message || 'Ошибка';
+      resultEl.textContent = e.message || 'Error';
     }
   }
   function paintResult(text) {
@@ -249,7 +249,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     histEl.textContent = '';
     state.history.forEach(function (h) {
       var row = document.createElement('div'); row.className = 'h-item'; row.tabIndex = 0;
-      row.title = 'Нажмите: вставить результат. Удерживайте: вставить выражение';
+      row.title = 'Tap to insert the result, hold to insert the expression';
       var a = document.createElement('span'); a.className = 'h-expr'; a.textContent = h.expr;
       var b = document.createElement('span'); b.className = 'h-val'; b.textContent = SI.format(h.value, SIG);
       row.appendChild(a); row.appendChild(b);
@@ -273,10 +273,10 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   function copyResult() {
     if (state.value == null) return;
     var text = resultEl.textContent;
-    var done = function () { toast('Скопировано: ' + text); };
+    var done = function () { toast('Copied: ' + text); };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text) ? done() : toast('Не удалось скопировать'); });
-    } else { fallbackCopy(text) ? done() : toast('Не удалось скопировать'); }
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text) ? done() : toast('Copy failed'); });
+    } else { fallbackCopy(text) ? done() : toast('Copy failed'); }
   }
   function fallbackCopy(text) {
     var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';

@@ -29,7 +29,7 @@
       var c = s[i];
       if (c === ' ' || c === '\t') { i++; continue; }
       if (c === '|') {
-        if (s[i + 1] !== '|') throw syntax('Ожидалось «||»', i);
+        if (s[i + 1] !== '|') throw syntax('Expected ||', i);
         t.push({ type: 'op', v: '||', pos: i }); i += 2; continue;
       }
       if ('+-*/^()'.indexOf(c) >= 0) { t.push({ type: 'op', v: c, pos: i }); i++; continue; }
@@ -38,8 +38,8 @@
       if (c === 'π') { t.push({ type: 'num', v: Math.PI, pos: i }); i++; continue; }
       if (s.substr(i, 2) === 'pi' && !isLetter(s[i + 2])) { t.push({ type: 'num', v: Math.PI, pos: i }); i += 2; continue; }
       if (isDigit(c) || c === '.') { i = readNumber(s, i, t); continue; }
-      if (prefixExp(c) !== null) throw syntax('Приставка «' + c + '» без числа', i);
-      throw syntax('Неизвестный символ «' + c + '»', i);
+      if (prefixExp(c) !== null) throw syntax('Prefix ' + c + ' needs a number', i);
+      throw syntax('Unknown symbol ' + c, i);
     }
     return t;
   }
@@ -55,8 +55,8 @@
       exp = prefixExp(s[i++]); rkm = true; num += '.';
       while (i < n && isDigit(s[i])) num += s[i++];
     }
-    if (num === '.' || num === '') throw syntax('Неверное число', start);
-    if ((num.match(/\./g) || []).length > 1 || s[i] === '.') throw syntax('Лишняя точка', i);
+    if (num === '.' || num === '') throw syntax('Invalid number', start);
+    if ((num.match(/\./g) || []).length > 1 || s[i] === '.') throw syntax('Extra decimal point', i);
     // Scientific exponent, lowercase e only: 1e3, 2.5e-6
     if (!rkm && s[i] === 'e' && (isDigit(s[i + 1]) || (/[+-]/.test(s[i + 1] || '') && isDigit(s[i + 2])))) {
       num += s[i++]; if (/[+-]/.test(s[i])) num += s[i++];
@@ -68,8 +68,8 @@
       var isPi = s[j] === 'π' || (s.substr(j, 2) === 'pi' && !isLetter(s[j + 2]));
       if (!isPi && prefixExp(s[j]) !== null) { exp = prefixExp(s[j]); i = j + 1; }
     }
-    if (prefixExp(s[i]) !== null && !(s.substr(i, 2) === 'pi' && !isLetter(s[i + 2]))) throw syntax('Две приставки подряд', i);
-    if (isLetter(s[i]) && s[i] !== 'π' && s.substr(i, 2) !== 'pi' && s.substr(i, 4) !== 'sqrt') throw syntax('Неизвестная приставка «' + s[i] + '»', i);
+    if (prefixExp(s[i]) !== null && !(s.substr(i, 2) === 'pi' && !isLetter(s[i + 2]))) throw syntax('Two prefixes in a row', i);
+    if (isLetter(s[i]) && s[i] !== 'π' && s.substr(i, 2) !== 'pi' && s.substr(i, 4) !== 'sqrt') throw syntax('Unknown prefix ' + s[i], i);
     t.push({ type: 'num', v: parseFloat(num) * Math.pow(10, exp), pos: start });
     return i;
   }
@@ -77,7 +77,7 @@
   // Precedence (low → high), as in FRS 2.3:  + -  <  × ÷ (and implicit ×)  <  ||  <  ^  <  unary (−, √)  <  ( ) / literals
   function evaluate(src) {
     var t = tokenize(src), p = 0;
-    if (!t.length) throw new CalcError('empty', 'Пустое выражение', 0);
+    if (!t.length) throw new CalcError('empty', 'Empty expression', 0);
     function at(v) { var k = t[p]; return k && k.type === 'op' && k.v === v; }
     function startsOperand() { var k = t[p]; return k && (k.type === 'num' || k.v === '(' || k.v === '√'); }
 
@@ -91,7 +91,7 @@
       for (;;) {
         if (at('*') || at('/')) {
           var tok = t[p++], r = par();
-          if (tok.v === '/' && r === 0) throw new CalcError('div0', 'Деление на 0', tok.pos);
+          if (tok.v === '/' && r === 0) throw new CalcError('div0', 'Div by 0', tok.pos);
           v = tok.v === '*' ? v * r : v / r;
         } else if (startsOperand()) {
           v = v * par(); // implicit: 2(3+4), 2π, 2√4
@@ -103,7 +103,7 @@
       while (at('||')) {
         var tok = t[p++], r = pow();
         if (v === 0 || r === 0) { v = 0; continue; }
-        if (v + r === 0) throw new CalcError('div0', 'Деление на 0 в ||', tok.pos);
+        if (v + r === 0) throw new CalcError('div0', 'Div by 0 in ||', tok.pos);
         v = v * r / (v + r);
       }
       return v;
@@ -118,30 +118,30 @@
       if (at('+')) { p++; return unary(); }
       if (at('√')) {
         var tok = t[p++], v = unary();
-        if (v < 0) throw new CalcError('domain', 'Корень из отрицательного', tok.pos);
+        if (v < 0) throw new CalcError('domain', 'Root of negative', tok.pos);
         return Math.sqrt(v);
       }
       return primary();
     }
     function primary() {
       var k = t[p];
-      if (!k) throw new CalcError('incomplete', 'Выражение не закончено', normalize(src).length);
+      if (!k) throw new CalcError('incomplete', 'Incomplete expression', normalize(src).length);
       if (k.type === 'num') { p++; return k.v; }
       if (k.v === '(') {
         p++;
-        if (at(')')) throw syntax('Пустые скобки', t[p].pos);
+        if (at(')')) throw syntax('Empty parentheses', t[p].pos);
         var v = expr();
         if (at(')')) p++;
-        else if (p < t.length) throw syntax('Ожидалась «)»', t[p].pos);
+        else if (p < t.length) throw syntax('Expected )', t[p].pos);
         // unclosed "(" at the very end is tolerated for live preview
         return v;
       }
-      throw syntax('Неожиданный «' + k.v + '»', k.pos);
+      throw syntax('Unexpected ' + k.v, k.pos);
     }
 
     var v = expr();
-    if (p < t.length) throw syntax(at(')') ? 'Лишняя «)»' : 'Неожиданный «' + t[p].v + '»', t[p].pos);
-    if (!isFinite(v) || isNaN(v)) throw new CalcError('range', 'Вне диапазона', 0);
+    if (p < t.length) throw syntax(at(')') ? 'Extra )' : 'Unexpected ' + t[p].v, t[p].pos);
+    if (!isFinite(v) || isNaN(v)) throw new CalcError('range', 'Out of range', 0);
     return v;
   }
 
