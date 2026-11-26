@@ -12,16 +12,20 @@ const pwa = path.join(dist, 'pwa');
 fs.mkdirSync(pwa, { recursive: true });
 fs.writeFileSync(path.join(dist, 'app.html'), fragment);
 
-const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#000"/><text x="256" y="330" font-family="Menlo,monospace" font-size="230" font-weight="600" text-anchor="middle" fill="#ffb547">µk</text></svg>`;
-fs.writeFileSync(path.join(pwa, 'icon.svg'), icon);
+for (const f of ['icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png']) fs.copyFileSync(path.join(root, 'web/icons', f), path.join(pwa, f));
 fs.writeFileSync(path.join(pwa, 'manifest.webmanifest'), JSON.stringify({
   name: 'PrefixCalc', short_name: 'PrefixCalc', start_url: './', scope: './', display: 'standalone',
   background_color: '#000000', theme_color: '#000000',
-  icons: [{ src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
+  icons: [
+    { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+    { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+    { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml' }
+  ]
 }, null, 2));
-const version = require('crypto').createHash('sha1').update(fragment).digest('hex').slice(0, 10);
+const version = require('crypto').createHash('sha1')
+  .update(fragment + ['icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png'].map(f => fs.readFileSync(path.join(root, 'web/icons', f), 'base64')).join('')).digest('hex').slice(0, 10);
 fs.writeFileSync(path.join(pwa, 'sw.js'), `const C='prefixcalc-${version}';
-self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./icon.svg'])));self.skipWaiting();});
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./icon.svg','./icon-180.png','./icon-192.png','./icon-512.png'])));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
 self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request)));});
 `);
@@ -32,7 +36,8 @@ const head = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="PrefixCalc">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
 </head>

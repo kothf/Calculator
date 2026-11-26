@@ -87,6 +87,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   transition: opacity .15s, transform .15s; pointer-events: none; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 @media (max-height: 700px) { .key { height: 44px; } .key.px { height: 36px; } #result { font-size: 32px; } .key.small { height: 32px; } }
+@media (max-height: 600px) { .key { height: 40px; font-size: 19px; } .key.px { height: 32px; } .key.small { height: 30px; } #result { font-size: 28px; } #expr { font-size: 19px; } .app { gap: 6px; } }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } .key:active { transform: none; } }
 </style>
 
@@ -359,7 +360,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   $('clearHist').addEventListener('click', function () { state.history = []; store.set('history', []); renderHistory(); });
 
   // initial state: the example from the idea, so the first screen shows what the app does
-  if (!state.history.length) state.history = [{ expr: '4k7 + 330', value: 5030 }, { expr: '1/(2π × 10k × 10n)', value: 1 / (2 * Math.PI * 1e4 * 1e-8) }];
+  if (store.get('history', null) === null) state.history = [{ expr: '4k7 + 330', value: 5030 }, { expr: '1/(2π × 10k × 10n)', value: 1 / (2 * Math.PI * 1e4 * 1e-8) }];
   input.value = '10n × 100k';
   paintSeries(); renderHistory(); render();
   setCaret(input.value.length);

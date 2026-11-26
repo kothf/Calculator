@@ -21,11 +21,19 @@
 ## Запуск
 
 ```sh
-npm test        # тесты парсера, включая таблицу приёмки из ТЗ (§4)
-npm run build   # собирает dist/pwa/ (PWA) и dist/app.html
+npm test          # тесты парсера, включая таблицу приёмки из ТЗ (§4)
+npm run build     # собирает dist/pwa/ (PWA) и dist/app.html
+npm run test:e2e  # проверка интерфейса в браузере (нужен Playwright с Chromium)
 ```
 
-Чтобы попробовать PWA локально: `npx serve dist/pwa`, затем открыть адрес с телефона в той же сети. Для установки на iPhone нужен HTTPS (например, GitHub Pages): Safari → «Поделиться» → «На экран „Домой“».
+## Установка на телефон
+
+Каждый push в `main` выкладывает PWA на GitHub Pages: https://kothf.github.io/calculator/
+
+- iPhone: открыть ссылку в Safari → «Поделиться» → «На экран „Домой“».
+- Android: открыть в Chrome → меню → «Установить приложение».
+
+После первого открытия приложение работает без интернета.
 
 ## Структура
 
@@ -34,7 +42,9 @@ npm run build   # собирает dist/pwa/ (PWA) и dist/app.html
 | `src/si.js` | Парсер, вычисление, форматирование, E-ряды. Без зависимостей. |
 | `test/si.test.js` | Тесты на `node:test`. |
 | `web/app.src.html` | Интерфейс. При сборке в него встраивается `src/si.js`. |
+| `web/icons/` | Иконка приложения (SVG и PNG 180/192/512). |
 | `scripts/build.js` | Сборка PWA. |
+| `test/e2e.js` | Проверка интерфейса в браузере. |
 
 ## Что дальше
 
