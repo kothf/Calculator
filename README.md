@@ -18,6 +18,12 @@ This is an MVP built as a web app (PWA). It runs in the browser on iPhone and An
 - Nearest standard value from the E12/E24/E96 series, with the error in percent.
 - History of the last 50 calculations: tap inserts the result, long press inserts the expression. Tap the result to copy it.
 - Custom keypad instead of the system keyboard. Move the cursor by tapping, with ◀ ▶, or by swiping the expression. A hardware keyboard works directly (Enter = `=`, Esc = clear).
+- **Tools** panel (button next to A ∥ B), each result has a **Use** button that drops it into the calculator:
+  - Voltage divider: Vout, ratio, current and power from Vin, R1, R2; picks a standard R1/R2 pair from the selected series for a target Vout (with the total resistance you want).
+  - RC / LC: time constant τ = RC, cutoff 1/(2πRC), LC resonance and characteristic impedance, X<sub>C</sub> and X<sub>L</sub> at a frequency.
+  - LED resistor: (Vs − Vf)/I rounded up to the next series value, actual current and power.
+  - Ohm's law: any two of V, I, R, P give the other two.
+  - Tool fields accept the same input as the calculator: `4k7`, `10n`, `4k7 || 10k`.
 - Haptic feedback on key press: Vibration API on Android, the system switch haptic on iOS 18+ (toggle with the Haptics button).
 - Light and dark themes (pure black for OLED), works offline.
 
@@ -43,13 +49,13 @@ After the first launch the app works without internet.
 | Path | Contents |
 | --- | --- |
 | `src/si.js` | Parser, evaluation, formatting, E-series. No dependencies. |
-| `test/si.test.js` | Unit tests (`node:test`). |
+| `src/tools.js` | Divider, RC/LC, LED resistor, Ohm's law. Depends only on `si.js`. |
+| `test/si.test.js`, `test/tools.test.js` | Unit tests (`node:test`). |
 | `test/e2e.js` | Browser checks of the built app. |
-| `web/app.src.html` | The UI. `src/si.js` is inlined into it at build time. |
+| `web/app.src.html` | The UI. `src/si.js` and `src/tools.js` are inlined into it at build time. |
 | `web/icons/` | App icon (SVG and PNG 180/192/512). |
 | `scripts/build.js` | PWA build. |
 
 ## Next steps
 
-- Phase 2 of the spec: RC/LC calculator, X<sub>C</sub>/X<sub>L</sub>, voltage divider picker.
 - Native version (Expo/React Native) with full system haptics.
