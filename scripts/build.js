@@ -1,4 +1,4 @@
-// Builds two outputs from web/app.src.html + src/si.js:
+// Builds two outputs from web/app.src.html + src/si.js + src/tools.js:
 //   dist/app.html  – page fragment (no <html>/<head>), used for the claude.ai artifact preview
 //   dist/pwa/      – standalone installable PWA (index.html + manifest + service worker + icon), works offline
 const fs = require('fs');
@@ -6,7 +6,8 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const src = fs.readFileSync(path.join(root, 'web/app.src.html'), 'utf8');
 const core = fs.readFileSync(path.join(root, 'src/si.js'), 'utf8');
-const fragment = src.replace('/*__SI_JS__*/', () => core);
+const tools = fs.readFileSync(path.join(root, 'src/tools.js'), 'utf8');
+const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools);
 const dist = path.join(root, 'dist');
 const pwa = path.join(dist, 'pwa');
 fs.mkdirSync(pwa, { recursive: true });
@@ -27,7 +28,9 @@ const version = require('crypto').createHash('sha1')
 fs.writeFileSync(path.join(pwa, 'sw.js'), `const C='prefixcalc-${version}';
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./icon.svg','./icon-180.png','./icon-192.png','./icon-512.png'])));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
-self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request)));});
+self.addEventListener('fetch',e=>{
+  if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(C).then(x=>x.put('./index.html',c));return r;}).catch(()=>caches.match('./index.html')));return;}
+  e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request)));});
 `);
 const head = `<!doctype html>
 <html lang="en">

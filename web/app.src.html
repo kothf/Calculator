@@ -79,7 +79,39 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 .key.ac { color: var(--err); font-family: var(--sans); font-weight: 600; font-size: 16px; }
 .key.px { height: 42px; background: var(--prefix-bg); color: var(--prefix); font-size: 19px; box-shadow: none; }
 .key.small { height: 36px; font-size: 14px; font-family: var(--sans); }
-.cursor-row { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 6px; }
+.cursor-row { display: grid; grid-template-columns: 1fr 1fr 1.4fr 1.6fr; gap: 6px; }
+.key.tools { background: var(--key-op); font-weight: 600; }
+
+/* Tools sheet: full-screen panel over the calculator */
+.sheet { position: fixed; inset: 0; z-index: 20; background: var(--bg); overflow-y: auto; -webkit-user-select: text; user-select: text;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.sheet-inner { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px 32px; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; }
+.sheet-head h2 { margin: 0; font: 600 20px/1.2 var(--sans); outline: none; }
+.done { font: 600 15px/1 var(--sans); color: var(--eq); background: transparent; border: 0; padding: 8px 4px; cursor: pointer; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.tabs button { border: 0; background: transparent; color: var(--muted); font: 500 13px/1 var(--sans); padding: 10px 4px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); }
+.tool-hint { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font: 500 12px/1.2 var(--sans); color: var(--muted); }
+.field input { width: 100%; box-sizing: border-box; font: 400 18px/1.2 var(--mono); color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px; outline: none; }
+.field input:focus { border-color: var(--eq); }
+.field input[aria-invalid="true"] { border-color: var(--err); }
+.group { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 4px 12px; }
+.group h3 { margin: 8px 0 2px; font: 600 11px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.out { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.group h3 + .out { border-top: 0; }
+.out-label { flex: 1; min-width: 0; font-size: 14px; }
+.out-val { font: 500 18px/1.2 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.out-val .pfx { color: var(--prefix); }
+.out-note { font: 400 12px/1.2 var(--mono); color: var(--muted); white-space: nowrap; }
+.use { flex: none; font: 600 12px/1 var(--sans); color: var(--eq); background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; cursor: pointer; }
+.group-err { padding: 10px 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 360px) { .out-note { display: none; } }
 .key:focus-visible, .chip:focus-visible, .eng:focus-visible, .seg button:focus-visible { outline: 2px solid var(--eq); outline-offset: 2px; }
 
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px);
@@ -128,6 +160,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <button class="key fn small" data-a="left" aria-label="Cursor left">◀</button>
     <button class="key fn small" data-a="right" aria-label="Cursor right">▶</button>
     <button class="key fn small" data-i="||" aria-label="Parallel">A ∥ B</button>
+    <button class="key fn small tools" data-a="tools" aria-haspopup="dialog">Tools</button>
   </div>
 
   <div class="keys">
@@ -156,10 +189,27 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <button class="key eq" data-a="eq">=</button>
   </div>
 </div>
+<div class="sheet" id="tools" role="dialog" aria-modal="true" aria-labelledby="toolsTitle" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-head">
+      <h2 id="toolsTitle" tabindex="-1">Tools</h2>
+      <button class="done" id="toolsDone">Done</button>
+    </div>
+    <div class="tabs" role="tablist" id="toolTabs">
+      <button role="tab" data-tab="divider">Divider</button><button role="tab" data-tab="rc">RC / LC</button><button role="tab" data-tab="led">LED</button><button role="tab" data-tab="ohm">Ohm</button>
+    </div>
+    <p class="tool-hint" id="toolHint"></p>
+    <div class="fields" id="toolFields"></div>
+    <div id="toolOut" style="display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+</div>
 <div class="toast" id="toast">Copied</div>
 
 <script>
 /*__SI_JS__*/
+</script>
+<script>
+/*__TOOLS_JS__*/
 </script>
 <script>
 (function () {
@@ -303,6 +353,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   // ---------- keypad ----------
   var actions = {
     ac: function () { input.value = ''; changed(); },
+    tools: function () { openTools(); },
     bs: backspace, left: function () { move(-1); }, right: function () { move(1); }, eq: commit,
     inv: function () {
       var r = sel(), v = input.value;
@@ -329,6 +380,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     else if (ev.key === '|' ) { ev.preventDefault(); insert('||'); }
   });
   document.addEventListener('keydown', function (ev) {
+    if (!$('tools').hidden) { if (ev.key === 'Escape') { ev.preventDefault(); closeTools(); } return; }
     if (document.activeElement === input || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     if (ev.key.length === 1) { ev.preventDefault(); input.focus(); insert(ev.key === '|' ? '||' : ev.key); }
     else if (ev.key === 'Backspace') { ev.preventDefault(); input.focus(); backspace(); }
@@ -378,6 +430,145 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   // initial state: the example from the idea, so the first screen shows what the app does
   if (store.get('history', null) === null) state.history = [{ expr: '4k7 + 330', value: 5030 }, { expr: '1/(2π × 10k × 10n)', value: 1 / (2 * Math.PI * 1e4 * 1e-8) }];
   input.value = '10n × 100k';
+  // ---------- Tools sheet ----------
+  var TOOL_DEFS = {
+    divider: {
+      hint: 'Vout = Vin · R2 / (R1 + R2). Set a target Vout to get a standard R1/R2 pair from the series selected under the result.',
+      fields: [['vin', 'Vin', 'V', '12'], ['r1', 'R1 (top)', 'Ω', '10k'], ['r2', 'R2 (bottom)', 'Ω', '4k7'],
+        ['vt', 'Target Vout', 'V', '3.3'], ['rt', 'R1 + R2 about', 'Ω', '10k']],
+      groups: function (v) {
+        return [
+          { title: 'Divider', need: ['vin', 'r1', 'r2'], run: function () {
+            var d = TOOLS.divider(v.vin, v.r1, v.r2);
+            return [['Vout', d.vout, 'V'], ['Ratio', d.ratio, ''], ['Current', d.current, 'A'], ['Power', d.power, 'W']];
+          } },
+          { title: 'Pick resistors (' + state.series + ')', need: ['vin', 'vt'], run: function () {
+            var d = TOOLS.designDivider(v.vin, v.vt, state.series, v.rt);
+            return [['R1', d.r1, 'Ω'], ['R2', d.r2, 'Ω'], ['Vout', d.vout, 'V', pct(d.errorPct)], ['Current', d.current, 'A']];
+          } }
+        ];
+      }
+    },
+    rc: {
+      hint: 'Fill in what you have: R and C give the time constant and cutoff, L and C the resonance, f gives the reactances.',
+      fields: [['r', 'R', 'Ω', '10k'], ['c', 'C', 'F', '10n'], ['l', 'L', 'H', '10µ'], ['f', 'Frequency f', 'Hz', '1k']],
+      groups: function (v) {
+        return [
+          { title: 'RC', need: ['r', 'c'], run: function () { var x = TOOLS.rc(v.r, v.c); return [['τ = RC', x.tau, 's'], ['Cutoff 1/(2πRC)', x.fc, 'Hz']]; } },
+          { title: 'LC', need: ['l', 'c'], run: function () { var x = TOOLS.lcResonance(v.l, v.c); return [['Resonance f₀', x.f0, 'Hz'], ['Impedance √(L/C)', x.z0, 'Ω']]; } },
+          { title: 'Reactance at f', need: ['f'], run: function () {
+            var rows = [];
+            if (v.c != null) rows.push(['X_C = 1/(2πfC)', TOOLS.reactanceC(v.f, v.c), 'Ω']);
+            if (v.l != null) rows.push(['X_L = 2πfL', TOOLS.reactanceL(v.f, v.l), 'Ω']);
+            if (!rows.length) throw new TOOLS.ToolError('Enter C or L');
+            return rows;
+          } }
+        ];
+      }
+    },
+    led: {
+      hint: 'R = (Vs − Vf) / I, rounded up to the next value of the selected series so the LED never gets more current than asked.',
+      fields: [['vs', 'Supply Vs', 'V', '5'], ['vf', 'LED Vf', 'V', '2'], ['i', 'LED current', 'A', '10m']],
+      groups: function (v) {
+        return [{ title: 'Series resistor (' + state.series + ')', need: ['vs', 'vf', 'i'], run: function () {
+          var x = TOOLS.ledResistor(v.vs, v.vf, v.i, state.series);
+          return [['Exact R', x.exact, 'Ω'], ['Standard R', x.standard, 'Ω'], ['Actual current', x.current, 'A'], ['Resistor power', x.power, 'W'], ['LED power', x.ledPower, 'W']];
+        } }];
+      }
+    },
+    ohm: {
+      hint: 'Fill in any two of V, I, R and P. Leave the other two empty.',
+      fields: [['v', 'Voltage V', 'V', '5'], ['i', 'Current I', 'A', ''], ['r', 'Resistance R', 'Ω', '1k'], ['p', 'Power P', 'W', '']],
+      groups: function (v) {
+        return [{ title: "Ohm's law", need: [], run: function () {
+          var x = TOOLS.ohm(v.v, v.i, v.r, v.p);
+          return [['Voltage', x.v, 'V'], ['Current', x.i, 'A'], ['Resistance', x.r, 'Ω'], ['Power', x.p, 'W']];
+        } }];
+      }
+    }
+  };
+  var tool = store.get('tool', 'divider');
+  if (!TOOL_DEFS[tool]) tool = 'divider';
+
+  function pct(p) { return Math.abs(p) < 0.005 ? 'exact' : (p >= 0 ? '+' : '−') + Math.abs(p).toFixed(Math.abs(p) < 10 ? 2 : 1) + '%'; }
+  function toolValues(id) {
+    var saved = store.get('tool:' + id, {}), out = {};
+    TOOL_DEFS[id].fields.forEach(function (f) { out[f[0]] = saved[f[0]] != null ? saved[f[0]] : f[3]; });
+    return out;
+  }
+  function renderToolFields() {
+    var def = TOOL_DEFS[tool], vals = toolValues(tool), box = $('toolFields');
+    $('toolHint').textContent = def.hint;
+    box.textContent = '';
+    def.fields.forEach(function (f) {
+      var wrap = document.createElement('div'); wrap.className = 'field';
+      var lab = document.createElement('label'); lab.htmlFor = 'tf-' + tool + '-' + f[0]; lab.textContent = f[1] + ', ' + f[2];
+      var inp = document.createElement('input');
+      inp.id = lab.htmlFor; inp.type = 'text'; inp.value = vals[f[0]]; inp.dataset.k = f[0];
+      inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocorrect', 'off'); inp.setAttribute('autocapitalize', 'off'); inp.spellcheck = false;
+      inp.placeholder = f[3] ? '' : 'leave empty';
+      inp.addEventListener('input', function () {
+        var saved = store.get('tool:' + tool, {}); saved[f[0]] = inp.value; store.set('tool:' + tool, saved); renderToolOut();
+      });
+      wrap.appendChild(lab); wrap.appendChild(inp); box.appendChild(wrap);
+    });
+    document.querySelectorAll('#toolTabs button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tool)); });
+    renderToolOut();
+  }
+  function renderToolOut() {
+    var v = {}, bad = {};
+    document.querySelectorAll('#toolFields input').forEach(function (inp) {
+      var k = inp.dataset.k, txt = inp.value.trim();
+      if (!txt) { v[k] = null; inp.removeAttribute('aria-invalid'); return; }
+      try { v[k] = SI.evaluate(txt); inp.removeAttribute('aria-invalid'); }
+      catch (e) { v[k] = null; bad[k] = true; inp.setAttribute('aria-invalid', 'true'); }
+    });
+    var out = $('toolOut'); out.textContent = '';
+    TOOL_DEFS[tool].groups(v).forEach(function (g) {
+      var box = document.createElement('div'); box.className = 'group';
+      var h = document.createElement('h3'); h.textContent = g.title; box.appendChild(h);
+      var missing = g.need.filter(function (k) { return v[k] == null; });
+      var rows = null, msg = null;
+      if (g.need.some(function (k) { return bad[k]; })) msg = 'Check the highlighted field';
+      else if (missing.length) msg = 'Enter ' + missing.map(function (k) { return fieldLabel(k); }).join(', ');
+      else { try { rows = g.run(); } catch (e) { msg = e.message || 'Error'; } }
+      if (msg) { var m = document.createElement('div'); m.className = 'group-err'; m.textContent = msg; box.appendChild(m); }
+      (rows || []).forEach(function (r) { box.appendChild(outRow(r[0], r[1], r[2], r[3])); });
+      out.appendChild(box);
+    });
+  }
+  function fieldLabel(k) { var f = TOOL_DEFS[tool].fields.filter(function (f) { return f[0] === k; })[0]; return f ? f[1] : k; }
+  function outRow(label, value, unit, note) {
+    var row = document.createElement('div'); row.className = 'out';
+    var l = document.createElement('span'); l.className = 'out-label'; l.textContent = label;
+    var val = document.createElement('span'); val.className = 'out-val';
+    var txt = unit ? SI.format(value, 4) : String(Number(value.toPrecision(4)));
+    var m = txt.match(/^(.*?)([pnµmkMGTf]?)$/);
+    val.appendChild(document.createTextNode(m[1]));
+    if (m[2]) { var px = document.createElement('span'); px.className = 'pfx'; px.textContent = m[2]; val.appendChild(px); }
+    if (unit) val.appendChild(document.createTextNode(unit));
+    row.appendChild(l);
+    if (note) { var n = document.createElement('span'); n.className = 'out-note'; n.textContent = note; row.appendChild(n); }
+    row.appendChild(val);
+    var use = document.createElement('button'); use.className = 'use'; use.textContent = 'Use';
+    use.setAttribute('aria-label', 'Use ' + label + ' in the calculator');
+    use.addEventListener('click', function () { buzz(); closeTools(); insert(reusable(value)); });
+    row.appendChild(use);
+    return row;
+  }
+  function openTools() {
+    $('tools').hidden = false; document.body.style.overflow = 'hidden';
+    renderToolFields(); $('toolsTitle').focus({ preventScroll: true });
+  }
+  function closeTools() {
+    $('tools').hidden = true; document.body.style.overflow = '';
+    input.focus({ preventScroll: true });
+  }
+  $('toolsDone').addEventListener('click', function () { buzz(); closeTools(); });
+  document.querySelectorAll('#toolTabs button').forEach(function (b) {
+    b.addEventListener('click', function () { tool = b.dataset.tab; store.set('tool', tool); buzz(); renderToolFields(); });
+  });
+
   paintSeries(); renderHistory(); render();
   setCaret(input.value.length);
   input.focus({ preventScroll: true });

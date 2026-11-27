@@ -68,6 +68,32 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   await key('AC');
   const bb = await last.boundingBox(); await p.mouse.move(bb.x + 10, bb.y + 5); await p.mouse.down(); await p.waitForTimeout(650); await p.mouse.up();
   ok(await expr() === '3.197k', 'long press inserts expression: ' + await expr());
+  // Tools sheet
+  await key('AC'); await p.click('#seriesSeg button[data-s="E24"]');
+  await p.click('.key.tools'); ok(await p.isVisible('#tools'), 'Tools opens');
+  await p.click('#toolTabs button[data-tab="divider"]');
+  const outText = () => p.textContent('#toolOut');
+  ok((await outText()).includes('3.837V'), 'divider Vout 12V 10k/4k7 = 3.837V');
+  await p.fill('#tf-divider-vin', '5'); ok((await outText()).includes('Vout') && (await outText()).includes('1.599V'), 'divider updates live: ' + (await outText()).slice(0, 60));
+  await p.fill('#tf-divider-r1', '4k7 || x'); ok(await p.getAttribute('#tf-divider-r1', 'aria-invalid') === 'true', 'invalid field is marked');
+  ok((await outText()).includes('Check the highlighted field'), 'invalid field explained');
+  await p.fill('#tf-divider-r1', '10k');
+  await p.keyboard.press('k'); ok(await p.inputValue('#expr') === '', 'typing in a tool field does not reach the calculator');
+  await p.fill('#tf-divider-r1', '10k');
+  await p.click('#toolTabs button[data-tab="led"]');
+  ok((await outText()).includes('Standard R300Ω'), 'LED 5V/2V/10mA → 300Ω (E24): ' + (await outText()).slice(0, 80));
+  await p.locator('.out', { hasText: 'Standard R' }).locator('.use').click();
+  ok(await p.isHidden('#tools') && await p.inputValue('#expr') === '300', 'Use inserts value and closes: ' + await p.inputValue('#expr'));
+  await p.click('#seriesSeg button[data-s="E12"]');
+  await p.click('.key.tools'); ok((await outText()).includes('Standard R330Ω'), 'series switch applies to tools (E12 → 330Ω)');
+  await p.click('#toolTabs button[data-tab="ohm"]'); ok((await outText()).includes('Current5mA'), 'Ohm 5V/1k → 5mA');
+  await p.fill('#tf-ohm-i', '1m'); ok((await outText()).includes('exactly two'), 'Ohm with three values asks for two');
+  await p.fill('#tf-ohm-i', '');
+  await p.click('#toolTabs button[data-tab="rc"]'); ok((await outText()).includes('1.592kHz'), 'RC cutoff 1.592kHz');
+  await p.keyboard.press('Escape'); ok(await p.isHidden('#tools'), 'Escape closes Tools');
+  await p.click('.key.tools'); ok(await p.getAttribute('#toolTabs button[data-tab="rc"]', 'aria-selected') === 'true', 'last tab remembered');
+  await p.click('#toolsDone'); await p.click('#seriesSeg button[data-s="E24"]');
+
   // physical keyboard
   await key('AC'); await p.focus('#expr'); await p.keyboard.type('100m*100M'); ok(await res() === '10M', 'physical keyboard 100m*100M = 10M');
   await p.keyboard.press('Enter'); ok(await expr() === '10M', 'Enter commits');
