@@ -97,7 +97,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 .modes { display: flex; gap: 6px; flex-wrap: wrap; }
 .modes button { font: 500 13px/1 var(--sans); color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; cursor: pointer; }
 .modes button[aria-pressed="true"] { background: var(--res-bg); color: var(--eq); border-color: var(--eq); font-weight: 600; }
-.modes[hidden], .field-err[hidden] { display: none; }
+.modes[hidden], .field-err[hidden], .field-note[hidden], .field[hidden], .calc-tag[hidden], .use[hidden], .clear-btn[hidden] { display: none; }
 .step { margin: 0; font: 600 11px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -109,6 +109,23 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 .field input:focus { border-color: var(--eq); box-shadow: 0 0 0 2px var(--res-line); }
 .field input[aria-invalid="true"] { border-color: var(--err); }
 .field-err { font-size: 12px; line-height: 1.35; color: var(--err); }
+.field-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 26px; }
+.field-box { position: relative; }
+.field-box input { padding-right: 38px; }
+.field input.computed { background: var(--res-bg); border: 1px dashed var(--eq); }
+.field input.computed::placeholder { color: var(--fg); opacity: 1; font-weight: 600; }
+.field input.computed.err::placeholder, .field input.missing::placeholder { color: var(--muted); font-weight: 400; }
+.field input::placeholder { color: var(--muted); opacity: 1; }
+.clear-btn { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; border-radius: 50%;
+  background: transparent; color: var(--muted); font: 400 20px/1 var(--sans); cursor: pointer; }
+.clear-btn:hover { background: var(--key-fn); }
+.calc-tag { font: 600 10px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--eq); }
+.field .use { padding: 5px 8px; }
+.field-note { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.tool-status { margin: 0; font-size: 14px; line-height: 1.4; color: var(--muted); min-height: 1.4em; }
+.tool-status.err { color: var(--err); }
+.tool-status.ok { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.result[hidden] { display: none; }
 .result { background: var(--res-bg); border: 1px solid var(--res-line); border-radius: 14px; padding: 4px 14px 6px; }
 .result .step { margin: 10px 0 2px; }
 .out { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--res-line); }
@@ -208,9 +225,9 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     </div>
     <div class="modes" id="toolModes" role="group" aria-label="What to calculate"></div>
     <p class="tool-hint" id="toolHint"></p>
-    <h3 class="step" id="givenTitle">You enter</h3>
-    <div class="fields" id="toolFields" role="group" aria-labelledby="givenTitle"></div>
-    <section class="result" id="toolOut" aria-live="polite" aria-labelledby="resultTitle"></section>
+    <div class="fields" id="toolFields" role="group" aria-label="Values"></div>
+    <p class="tool-status" id="toolStatus" aria-live="polite"></p>
+    <section class="result" id="toolOut" aria-labelledby="alsoTitle" hidden></section>
   </div>
 </div>
 <div class="toast" id="toast">Copied</div>
@@ -441,70 +458,44 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   if (store.get('history', null) === null) state.history = [{ expr: '4k7 + 330', value: 5030 }, { expr: '1/(2π × 10k × 10n)', value: 1 / (2 * Math.PI * 1e4 * 1e-8) }];
   input.value = '10n × 100k';
   // ---------- Tools sheet ----------
-  // Each tool has one or more modes. A mode lists its inputs (key, label, unit, default, optional)
-  // and turns the parsed values into result rows [label, value, unit, note].
+  // Every tool is one set of quantities. Fill in the known ones; an empty field is calculated
+  // and its value is shown inside that same field, so one name always has one value.
   var TOOL_DEFS = {
     divider: { modes: [
-      { id: 'vout', label: 'Find Vout', hint: 'Vout = Vin · R2 / (R1 + R2). R1 is the top resistor, R2 the bottom one.',
-        fields: [['vin', 'Vin', 'V', '12'], ['r1', 'R1, top', 'Ω', '10k'], ['r2', 'R2, bottom', 'Ω', '4k7']],
-        run: function (v) {
-          var d = TOOLS.divider(v.vin, v.r1, v.r2);
-          return [['Vout', d.vout, 'V'], ['Ratio Vout/Vin', d.ratio, ''], ['Current', d.current, 'A'], ['Power', d.power, 'W']];
-        } },
-      { id: 'pick', label: 'Pick R1, R2', hint: 'Finds the pair of standard resistors from the selected series that gives Vout closest to your target.',
-        fields: [['vin', 'Vin', 'V', '12'], ['vt', 'Wanted Vout', 'V', '3.3'], ['rt', 'R1 + R2 about', 'Ω', '10k', true]],
-        series: true,
-        run: function (v) {
-          var d = TOOLS.designDivider(v.vin, v.vt, state.series, v.rt);
-          return [['R1, top', d.r1, 'Ω'], ['R2, bottom', d.r2, 'Ω'], ['Vout you get', d.vout, 'V', pct(d.errorPct)], ['Current', d.current, 'A']];
-        } }
+      { id: 'divider', label: 'Divider', solver: 'divider',
+        hint: 'Vout = Vin · R2 / (R1 + R2), R1 on top. Leave empty the value to find. Leave R1 and R2 both empty to pick a standard pair.',
+        fields: [['vin', 'Vin', 'V', '12'], ['vout', 'Vout', 'V', ''], ['r1', 'R1, top', 'Ω', '10k'], ['r2', 'R2, bottom', 'Ω', '4k7']] }
     ] },
     rc: { modes: [
-      { id: 'rc', label: 'RC filter', hint: 'Time constant and −3 dB cutoff of an RC low-pass or high-pass filter.',
-        fields: [['r', 'R', 'Ω', '10k'], ['c', 'C', 'F', '10n']],
-        run: function (v) { var x = TOOLS.rc(v.r, v.c); return [['Time constant τ = RC', x.tau, 's'], ['Cutoff 1/(2πRC)', x.fc, 'Hz']]; } },
-      { id: 'lc', label: 'LC resonance', hint: 'Resonant frequency and characteristic impedance of an LC circuit.',
-        fields: [['l', 'L', 'H', '10µ'], ['c', 'C', 'F', '10n']],
-        run: function (v) { var x = TOOLS.lcResonance(v.l, v.c); return [['Resonance f₀', x.f0, 'Hz'], ['Impedance √(L/C)', x.z0, 'Ω']]; } },
-      { id: 'x', label: 'Reactance', hint: 'Reactance of a capacitor and of an inductor at frequency f. Fill in C, L or both.',
-        fields: [['f', 'Frequency f', 'Hz', '1k'], ['c', 'C', 'F', '10n', true], ['l', 'L', 'H', '10µ', true]],
-        run: function (v) {
-          var rows = [];
-          if (v.c != null) rows.push(['X_C = 1/(2πfC)', TOOLS.reactanceC(v.f, v.c), 'Ω']);
-          if (v.l != null) rows.push(['X_L = 2πfL', TOOLS.reactanceL(v.f, v.l), 'Ω']);
-          if (!rows.length) throw new TOOLS.ToolError('Enter C, L or both.');
-          return rows;
-        } }
+      { id: 'rc', label: 'RC filter', solver: 'rc', hint: 'Cutoff fc = 1/(2πRC). Leave empty the value to find.',
+        fields: [['r', 'R', 'Ω', '10k'], ['c', 'C', 'F', '10n'], ['fc', 'Cutoff fc', 'Hz', '']] },
+      { id: 'lc', label: 'LC resonance', solver: 'lc', hint: 'f₀ = 1/(2π√(LC)). Leave empty the value to find.',
+        fields: [['l', 'L', 'H', '10µ'], ['c', 'C', 'F', '10n'], ['f0', 'Resonance f₀', 'Hz', '']] },
+      { id: 'xc', label: 'X_C', solver: 'xc', hint: 'Capacitor reactance X_C = 1/(2πfC). Leave empty the value to find.',
+        fields: [['f', 'Frequency f', 'Hz', '1k'], ['c', 'C', 'F', '10n'], ['x', 'X_C', 'Ω', '']] },
+      { id: 'xl', label: 'X_L', solver: 'xl', hint: 'Inductor reactance X_L = 2πfL. Leave empty the value to find.',
+        fields: [['f', 'Frequency f', 'Hz', '1k'], ['l', 'L', 'H', '10µ'], ['x', 'X_L', 'Ω', '']] }
     ] },
     led: { modes: [
-      { id: 'led', label: 'LED resistor', hint: 'R = (Vs − Vf) / I, rounded up to the next value of the selected series so the LED never gets more current than you set.',
-        fields: [['vs', 'Supply Vs', 'V', '5'], ['vf', 'LED forward voltage Vf', 'V', '2'], ['i', 'LED current', 'A', '10m']],
-        series: true,
-        run: function (v) {
-          var x = TOOLS.ledResistor(v.vs, v.vf, v.i, state.series);
-          return [['Resistor', x.standard, 'Ω'], ['Exact value', x.exact, 'Ω'], ['Actual current', x.current, 'A'], ['Resistor power', x.power, 'W'], ['LED power', x.ledPower, 'W']];
-        } }
+      { id: 'led', label: 'LED resistor', solver: 'led', hint: 'R = (Vs − Vf) / I. Leave empty the value to find. A calculated R is rounded up to the selected series.',
+        fields: [['vs', 'Supply Vs', 'V', '5'], ['vf', 'LED Vf', 'V', '2'], ['i', 'LED current', 'A', '10m'], ['r', 'Resistor R', 'Ω', '']] }
     ] },
     ohm: { modes: [
-      { id: 'ohm', label: "Ohm's law", hint: 'Fill in any two of V, I, R and P and leave the other two empty.',
-        fields: [['v', 'Voltage V', 'V', '5', true], ['i', 'Current I', 'A', '', true], ['r', 'Resistance R', 'Ω', '1k', true], ['p', 'Power P', 'W', '', true]],
-        anyTwo: true,
-        run: function (v) {
-          var x = TOOLS.ohm(v.v, v.i, v.r, v.p);
-          return [['Voltage', x.v, 'V'], ['Current', x.i, 'A'], ['Resistance', x.r, 'Ω'], ['Power', x.p, 'W']];
-        } }
+      { id: 'ohm', label: "Ohm's law", solver: 'ohm', hint: 'Fill in any two of V, I, R and P. The two empty fields are calculated.',
+        fields: [['v', 'Voltage V', 'V', '5'], ['i', 'Current I', 'A', ''], ['r', 'Resistance R', 'Ω', '1k'], ['p', 'Power P', 'W', '']] }
     ] }
   };
   var tool = store.get('tool', 'divider');
   if (!TOOL_DEFS[tool]) tool = 'divider';
   var toolModes = store.get('toolModes', {});
 
-  function pct(p) { return Math.abs(p) < 0.005 ? 'exact' : (p >= 0 ? '+' : '−') + Math.abs(p).toFixed(Math.abs(p) < 10 ? 2 : 1) + '%'; }
   function currentMode() {
     var modes = TOOL_DEFS[tool].modes, id = toolModes[tool];
     return modes.filter(function (m) { return m.id === id; })[0] || modes[0];
   }
-  function savedValue(k, def) { var saved = store.get('tool:' + tool, {}); return saved[k] != null ? saved[k] : def; }
+  function modeStore(mode) { return store.get('tool2:' + mode.id, {}); }
+  function savedValue(mode, k, def) { var saved = modeStore(mode); return saved[k] != null ? saved[k] : def; }
+  function saveValue(mode, k, val) { var saved = modeStore(mode); saved[k] = val; store.set('tool2:' + mode.id, saved); }
   function parseField(txt) {
     txt = txt.trim();
     if (!txt) return { value: null };
@@ -516,6 +507,8 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     if (msg) { inp.setAttribute('aria-invalid', 'true'); err.textContent = msg + '. Example: 4k7, 10n, 3.3'; err.hidden = false; }
     else { inp.removeAttribute('aria-invalid'); err.textContent = ''; err.hidden = true; }
   }
+  function fmtValue(v, unit) { return unit ? SI.format(v, 4) + unit : String(Number(v.toPrecision(4))); }
+  function fid(k) { return 'tf-' + currentMode().id + '-' + k; }
 
   function renderToolFields() {
     var mode = currentMode(), box = $('toolFields'), modesBox = $('toolModes');
@@ -530,49 +523,87 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     });
     $('toolHint').textContent = mode.hint;
     box.textContent = '';
-    mode.fields.forEach(function (f) {
-      var id = 'tf-' + tool + '-' + f[0];
-      var wrap = document.createElement('div'); wrap.className = 'field';
+    var fields = mode.fields.slice();
+    if (mode.id === 'divider') fields.push(['rt', 'R1 + R2 about', 'Ω', '10k', 'pair']);
+    fields.forEach(function (f) {
+      var id = fid(f[0]);
+      var wrap = document.createElement('div'); wrap.className = 'field'; wrap.id = id + '-wrap';
+      var head = document.createElement('div'); head.className = 'field-head';
       var lab = document.createElement('label'); lab.htmlFor = id;
       lab.appendChild(document.createTextNode(f[1] + ' '));
       var u = document.createElement('span'); u.className = 'unit'; u.textContent = '(' + f[2] + ')'; lab.appendChild(u);
-      if (f[4] && !mode.anyTwo) { var o = document.createElement('span'); o.className = 'opt'; o.textContent = ', optional'; lab.appendChild(o); }
+      if (f[4] === 'pair') { var o = document.createElement('span'); o.className = 'opt'; o.textContent = ', optional'; lab.appendChild(o); }
+      head.appendChild(lab);
+      var use = document.createElement('button'); use.className = 'use'; use.id = id + '-use'; use.textContent = 'Use'; use.hidden = true;
+      use.setAttribute('aria-label', 'Use ' + f[1] + ' in the calculator');
+      head.appendChild(use);
+      var fbox = document.createElement('div'); fbox.className = 'field-box';
       var inp = document.createElement('input');
-      inp.id = id; inp.type = 'text'; inp.value = savedValue(f[0], f[3]); inp.dataset.k = f[0];
+      inp.id = id; inp.type = 'text'; inp.value = savedValue(mode, f[0], f[3]); inp.dataset.k = f[0]; inp.dataset.unit = f[2];
       inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocorrect', 'off'); inp.setAttribute('autocapitalize', 'off'); inp.spellcheck = false;
-      inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-describedby', id + '-err');
+      inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-describedby', id + '-note ' + id + '-err');
+      var clr = document.createElement('button'); clr.className = 'clear-btn'; clr.type = 'button'; clr.textContent = '×';
+      clr.setAttribute('aria-label', 'Clear ' + f[1] + ' to calculate it');
+      clr.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+      clr.addEventListener('click', function () { inp.value = ''; saveValue(mode, f[0], ''); showFieldError(inp, null); buzz(); renderToolOut(); });
+      var note = document.createElement('div'); note.className = 'field-note'; note.id = id + '-note'; note.hidden = true;
       var err = document.createElement('div'); err.className = 'field-err'; err.id = id + '-err'; err.hidden = true;
       inp.addEventListener('input', function () {
-        var saved = store.get('tool:' + tool, {}); saved[f[0]] = inp.value; store.set('tool:' + tool, saved);
+        saveValue(mode, f[0], inp.value);
         if (inp.getAttribute('aria-invalid') && !parseField(inp.value).error) showFieldError(inp, null); // clear errors while typing, never add them
         renderToolOut();
       });
       inp.addEventListener('blur', function () { showFieldError(inp, parseField(inp.value).error); });
       inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') inp.blur(); });
-      wrap.appendChild(lab); wrap.appendChild(inp); wrap.appendChild(err); box.appendChild(wrap);
+      fbox.appendChild(inp); fbox.appendChild(clr);
+      wrap.appendChild(head); wrap.appendChild(fbox); wrap.appendChild(note); wrap.appendChild(err); box.appendChild(wrap);
       showFieldError(inp, parseField(inp.value).error);
     });
     renderToolOut();
   }
 
   function renderToolOut() {
-    var mode = currentMode(), v = {}, bad = [], missing = [];
+    var mode = currentMode(), v = {}, bad = [];
     mode.fields.forEach(function (f) {
-      var inp = document.getElementById('tf-' + tool + '-' + f[0]), r = parseField(inp ? inp.value : '');
+      var r = parseField($(fid(f[0])).value);
       v[f[0]] = r.error ? null : r.value;
       if (r.error) bad.push(f[1]);
-      else if (r.value == null && !f[4]) missing.push(f[1]);
     });
+    var rtInp = $(fid('rt')), total = null;
+    if (rtInp) { var rr = parseField(rtInp.value); total = rr.error ? null : rr.value; }
+    // divider: the R1 + R2 field only matters when both resistors are being picked
+    if (rtInp) $(fid('rt') + '-wrap').hidden = !(v.r1 == null && v.r2 == null && !bad.length && !$(fid('r1')).value.trim() && !$(fid('r2')).value.trim());
+
+    var res = null, msg = null;
+    if (bad.length) msg = 'Fix ' + bad.join(', ') + ' to calculate.';
+    else { try { res = TOOLS.solve(mode.solver, v, { series: state.series, total: total }); } catch (e) { msg = e.message || 'Cannot calculate with these values.'; } }
+
+    mode.fields.forEach(function (f) {
+      var k = f[0], id = fid(k), inp = $(id), solved = !!res && res.solved.indexOf(k) >= 0, empty = !inp.value.trim();
+      inp.classList.toggle('computed', solved);
+      inp.classList.toggle('missing', empty && !solved);
+      inp.placeholder = solved ? '= ' + fmtValue(res[k], f[2]) : (empty ? 'to calculate' : '');
+      var use = $(id + '-use'); use.hidden = !solved;
+      use.onclick = solved ? (function (val) { return function () { buzz(); closeTools(); insert(reusable(val)); }; })(res[k]) : null;
+      $(id).nextSibling.hidden = empty;  // clear button only on filled fields
+      var note = $(id + '-note'), text = res && res.note && res.note[k];
+      note.textContent = text || ''; note.hidden = !text;
+    });
+
+    var status = $('toolStatus');
+    status.className = 'tool-status ' + (msg ? 'err' : 'ok');
+    status.textContent = msg || ('Calculated: ' + res.solved.map(function (k) {
+      var f = mode.fields.filter(function (x) { return x[0] === k; })[0]; return f[1] + ' = ' + fmtValue(res[k], f[2]);
+    }).join(', ') + '.');
+
     var out = $('toolOut'); out.textContent = '';
-    var h = document.createElement('h3'); h.className = 'step'; h.id = 'resultTitle';
-    h.textContent = 'Result' + (mode.series ? ' · ' + state.series + ' series' : '');
-    out.appendChild(h);
-    var rows = null, msg = null;
-    if (bad.length) msg = 'Fix ' + bad.join(', ') + ' above to see the result.';
-    else if (missing.length) msg = 'Enter ' + missing.join(', ') + ' to see the result.';
-    else { try { rows = mode.run(v); } catch (e) { msg = e.message || 'Cannot calculate with these values.'; } }
-    if (msg) { var m = document.createElement('div'); m.className = 'result-empty'; m.textContent = msg; out.appendChild(m); }
-    (rows || []).forEach(function (r) { out.appendChild(outRow(r[0], r[1], r[2], r[3])); });
+    var extra = res ? res.extra : [];
+    out.hidden = !extra.length;
+    if (extra.length) {
+      var h = document.createElement('h3'); h.className = 'step'; h.id = 'alsoTitle'; h.textContent = 'Also';
+      out.appendChild(h);
+      extra.forEach(function (r) { out.appendChild(outRow(r[0], r[1], r[2])); });
+    }
   }
   function outRow(label, value, unit, note) {
     var row = document.createElement('div'); row.className = 'out';

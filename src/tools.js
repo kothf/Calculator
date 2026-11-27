@@ -102,9 +102,111 @@
     return { v: v, i: i, r: r, p: p };
   }
 
+  // ---------- solvers: one set of quantities, the empty ones are calculated ----------
+  // Each solver takes an object with every quantity (null = unknown) and returns all of them,
+  // plus `extra` derived values and, where useful, `note` per quantity.
+  function count(o, keys) { return keys.filter(function (k) { return o[k] == null; }); }
+  function onlyOne(v, keys, total) {
+    var miss = count(v, keys);
+    need(miss.length > 0, 'Clear the field you want to calculate');
+    need(miss.length === 1, 'Leave only one field empty');
+    return miss[0];
+  }
+  function positive(v, keys) { keys.forEach(function (k) { if (v[k] != null) need(v[k] > 0, 'Values must be positive'); }); }
+
+  var SOLVERS = {
+    divider: function (v, opts) {
+      var keys = ['vin', 'r1', 'r2', 'vout'], miss = count(v, keys), o = { vin: v.vin, r1: v.r1, r2: v.r2, vout: v.vout }, note = {};
+      positive(v, ['r1', 'r2']);
+      need(miss.length > 0, 'Clear the field you want to calculate');
+      if (miss.length === 2 && miss.indexOf('r1') >= 0 && miss.indexOf('r2') >= 0) {
+        var d = designDivider(v.vin, v.vout, opts.series, opts.total);
+        o.r1 = d.r1; o.r2 = d.r2;
+        note.vout = 'You get ' + SI.format(d.vout, 4) + 'V (' + pctText(d.errorPct) + ') with ' + opts.series;
+        note.r1 = opts.series + ' pair, R1 + R2 about ' + SI.format(opts.total || 10e3, 3) + 'Ω';
+        o.actual = d.vout;
+      } else {
+        need(miss.length === 1, 'Leave one field empty, or both R1 and R2 to pick a pair');
+        var m = miss[0];
+        if (m === 'vout') o.vout = v.vin * v.r2 / (v.r1 + v.r2);
+        else if (m === 'vin') { need(v.vout !== 0, 'Vout must not be 0'); o.vin = v.vout * (v.r1 + v.r2) / v.r2; }
+        else if (m === 'r1') { need(v.vin > v.vout && v.vout > 0, 'Vout must be between 0 and Vin'); o.r1 = v.r2 * (v.vin / v.vout - 1); }
+        else { need(v.vin > v.vout && v.vout > 0, 'Vout must be between 0 and Vin'); o.r2 = v.r1 * v.vout / (v.vin - v.vout); }
+        if (m === 'r1' || m === 'r2') {
+          var std = SI.nearestE(o[m], opts.series), r1 = m === 'r1' ? std.value : o.r1, r2 = m === 'r2' ? std.value : o.r2;
+          note[m] = opts.series + ': ' + std.label + 'Ω gives ' + SI.format(o.vin * r2 / (r1 + r2), 4) + 'V';
+        }
+      }
+      var i = o.vin / (o.r1 + o.r2);
+      o.extra = [['Current', i, 'A'], ['Power', o.vin * i, 'W'], ['Ratio Vout/Vin', o.r2 / (o.r1 + o.r2), '']];
+      o.note = note; o.solved = miss;
+      return o;
+    },
+    rc: function (v) {
+      var m = onlyOne(v, ['r', 'c', 'fc']), o = { r: v.r, c: v.c, fc: v.fc };
+      positive(v, ['r', 'c', 'fc']);
+      if (m === 'fc') o.fc = 1 / (TWO_PI * v.r * v.c);
+      else if (m === 'r') o.r = 1 / (TWO_PI * v.fc * v.c);
+      else o.c = 1 / (TWO_PI * v.fc * v.r);
+      o.extra = [['Time constant τ = RC', o.r * o.c, 's']]; o.solved = [m]; o.note = {};
+      return o;
+    },
+    lc: function (v) {
+      var m = onlyOne(v, ['l', 'c', 'f0']), o = { l: v.l, c: v.c, f0: v.f0 }, w2;
+      positive(v, ['l', 'c', 'f0']);
+      if (m === 'f0') o.f0 = 1 / (TWO_PI * Math.sqrt(v.l * v.c));
+      else { w2 = Math.pow(TWO_PI * v.f0, 2); if (m === 'l') o.l = 1 / (w2 * v.c); else o.c = 1 / (w2 * v.l); }
+      o.extra = [['Impedance √(L/C)', Math.sqrt(o.l / o.c), 'Ω']]; o.solved = [m]; o.note = {};
+      return o;
+    },
+    xc: function (v) {
+      var m = onlyOne(v, ['f', 'c', 'x']), o = { f: v.f, c: v.c, x: v.x };
+      positive(v, ['f', 'c', 'x']);
+      if (m === 'x') o.x = 1 / (TWO_PI * v.f * v.c);
+      else if (m === 'c') o.c = 1 / (TWO_PI * v.f * v.x);
+      else o.f = 1 / (TWO_PI * v.c * v.x);
+      o.extra = []; o.solved = [m]; o.note = {};
+      return o;
+    },
+    xl: function (v) {
+      var m = onlyOne(v, ['f', 'l', 'x']), o = { f: v.f, l: v.l, x: v.x };
+      positive(v, ['f', 'l', 'x']);
+      if (m === 'x') o.x = TWO_PI * v.f * v.l;
+      else if (m === 'l') o.l = v.x / (TWO_PI * v.f);
+      else o.f = v.x / (TWO_PI * v.l);
+      o.extra = []; o.solved = [m]; o.note = {};
+      return o;
+    },
+    led: function (v, opts) {
+      var m = onlyOne(v, ['vs', 'vf', 'i', 'r']), o = { vs: v.vs, vf: v.vf, i: v.i, r: v.r }, note = {};
+      positive(v, ['vs', 'vf', 'i', 'r']);
+      if (m === 'r') { need(v.vs > v.vf, 'Supply must be higher than LED voltage'); o.r = (v.vs - v.vf) / v.i; }
+      else if (m === 'i') { need(v.vs > v.vf, 'Supply must be higher than LED voltage'); o.i = (v.vs - v.vf) / v.r; }
+      else if (m === 'vs') o.vs = v.vf + v.i * v.r;
+      else { o.vf = v.vs - v.i * v.r; need(o.vf > 0, 'Current times R is more than the supply'); }
+      if (m === 'r') {
+        var std = standardAtLeast(o.r, opts.series), ia = (o.vs - o.vf) / std;
+        note.r = opts.series + ' rounded up: ' + SI.format(std, 3) + 'Ω, current ' + SI.format(ia, 4) + 'A';
+      }
+      o.extra = [['Resistor power', o.i * o.i * o.r, 'W'], ['LED power', o.i * o.vf, 'W']];
+      o.solved = [m]; o.note = note;
+      return o;
+    },
+    ohm: function (v) {
+      var miss = count(v, ['v', 'i', 'r', 'p']);
+      need(miss.length > 0, 'Clear the fields you want to calculate');
+      need(miss.length === 2, 'Fill in exactly two values');
+      var x = ohm(v.v, v.i, v.r, v.p);
+      x.extra = []; x.solved = miss; x.note = {};
+      return x;
+    }
+  };
+  function pctText(p) { return Math.abs(p) < 0.005 ? 'exact' : (p >= 0 ? '+' : '−') + Math.abs(p).toFixed(2) + '%'; }
+  function solve(id, values, opts) { return SOLVERS[id](values, opts || { series: 'E24' }); }
+
   return {
     divider: divider, designDivider: designDivider, rc: rc, lcResonance: lcResonance,
     reactanceC: reactanceC, reactanceL: reactanceL, ledResistor: ledResistor, ohm: ohm,
-    seriesValues: seriesValues, standardAtLeast: standardAtLeast, ToolError: ToolError
+    seriesValues: seriesValues, standardAtLeast: standardAtLeast, ToolError: ToolError, solve: solve
   };
 });
