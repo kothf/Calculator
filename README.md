@@ -18,12 +18,12 @@ This is an MVP built as a web app (PWA). It runs in the browser on iPhone and An
 - Nearest standard value from the E12/E24/E96 series, with the error in percent.
 - History of the last 50 calculations: tap inserts the result, long press inserts the expression. Tap the result to copy it.
 - Custom keypad instead of the system keyboard. Move the cursor by tapping, with ◀ ▶, or by swiping the expression. A hardware keyboard works directly (Enter = `=`, Esc = clear).
-- **Tools** panel (button next to A ∥ B), each result has a **Use** button that drops it into the calculator:
-  - Voltage divider: Vout, ratio, current and power from Vin, R1, R2; picks a standard R1/R2 pair from the selected series for a target Vout (with the total resistance you want).
-  - RC / LC: time constant τ = RC, cutoff 1/(2πRC), LC resonance and characteristic impedance, X<sub>C</sub> and X<sub>L</sub> at a frequency.
-  - LED resistor: (Vs − Vf)/I rounded up to the next series value, actual current and power.
-  - Ohm's law: any two of V, I, R, P give the other two.
-  - Tool fields accept the same input as the calculator: `4k7`, `10n`, `4k7 || 10k`.
+- **Tools** panel (button next to A ∥ B). Each tool is one set of fields: fill in what you know and leave empty what you want to find; the result appears in that same field, with a **Use** button that drops it into the calculator.
+  - Divider: Vin, Vout, R1, R2, any one empty. Leave R1 and R2 both empty to pick a standard pair from the selected series (with the total resistance you want).
+  - RC filter (R, C, fc), LC resonance (L, C, f₀), X_C (f, C, X_C), X_L (f, L, X_L): any one empty.
+  - LED: Vs, Vf, I, R, any one empty. A calculated R also shows the next series value up and the current it gives.
+  - Ohm's law: any two of V, I, R, P.
+  - Derived values (current, power, τ, √(L/C)) are listed under "Also". Fields accept calculator input: `4k7`, `10n`, `4k7 || 10k`.
 - Haptic feedback on key press: Vibration API on Android, the system switch haptic on iOS 18+ (toggle with the Haptics button).
 - Light and dark themes (pure black for OLED), works offline.
 

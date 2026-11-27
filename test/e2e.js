@@ -68,44 +68,67 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   await key('AC');
   const bb = await last.boundingBox(); await p.mouse.move(bb.x + 10, bb.y + 5); await p.mouse.down(); await p.waitForTimeout(650); await p.mouse.up();
   ok(await expr() === '3.197k', 'long press inserts expression: ' + await expr());
-  // Tools sheet
+  // Tools sheet: one set of fields, the empty one is calculated in place
   await key('AC'); await p.click('#seriesSeg button[data-s="E24"]');
   await p.click('.key.tools'); ok(await p.isVisible('#tools'), 'Tools opens');
   await p.click('#toolTabs button[data-tab="divider"]');
-  const outText = () => p.textContent('#toolOut');
-  const mode = m => p.click(`#toolModes button:text-is("${m}")`);
-  await mode('Find Vout');
-  ok((await outText()).includes('3.837V'), 'divider Vout 12V 10k/4k7 = 3.837V');
-  await p.fill('#tf-divider-vin', '5'); ok((await outText()).includes('1.599V'), 'divider updates live');
+  const ph = sel => p.getAttribute(sel, 'placeholder');
+  const status = () => p.textContent('#toolStatus');
+  ok(await ph('#tf-divider-vout') === '= 3.837V', 'empty Vout is calculated in its own field');
+  ok(await p.getAttribute('#tf-divider-vout', 'class') === 'computed', 'calculated field is marked');
+  ok(await p.isVisible('#tf-divider-vout-use'), 'calculated field has Use');
+  ok((await p.textContent('#toolOut')).includes('816.3µA'), 'derived current shown under Also');
+  await p.fill('#tf-divider-vin', '5'); ok(await ph('#tf-divider-vout') === '= 1.599V', 'recalculates live');
+  // solve for a different quantity: clear R2, enter Vout
+  await p.click('#tf-divider-r2 + .clear-btn'); ok(await p.inputValue('#tf-divider-r2') === '', 'clear button empties the field');
+  ok((await status()).includes('Leave one field empty'), 'two unknowns explained: ' + await status());
+  await p.fill('#tf-divider-vout', '3.3');
+  ok(await ph('#tf-divider-r2') === '= 19.41kΩ', 'R2 calculated from Vin, R1, Vout: ' + await ph('#tf-divider-r2'));
+  ok((await p.textContent('#tf-divider-r2-note')).startsWith('E24: 20kΩ gives'), 'series hint under calculated R');
+  ok(!(await p.isVisible('#tf-divider-rt')), 'R1 + R2 field hidden unless picking a pair');
+  await p.fill('#tf-divider-r1', '');
+  ok(await p.isVisible('#tf-divider-rt'), 'R1 + R2 field shown when both R are empty');
+  ok(await ph('#tf-divider-r1') === '= 4.7kΩ' && await ph('#tf-divider-r2') === '= 9.1kΩ', 'pair picked from E24');
+  ok((await p.textContent('#tf-divider-vout-note')).includes('−0.09%'), 'actual Vout and error shown');
+  await p.fill('#tf-divider-r1', '10k'); await p.fill('#tf-divider-r2', '4k7');
+  ok((await status()).includes('Clear the field you want to calculate'), 'all filled → asks to clear one');
+  ok(await p.isVisible('#toolStatus'), 'error status visible');
+  // validation on blur
   await p.fill('#tf-divider-r1', '4k7 || x');
   ok(await p.getAttribute('#tf-divider-r1', 'aria-invalid') !== 'true', 'no error while typing');
   await p.click('#tf-divider-vin');
   ok(await p.getAttribute('#tf-divider-r1', 'aria-invalid') === 'true', 'invalid field marked on blur');
   ok((await p.textContent('#tf-divider-r1-err')).includes('Example'), 'field error says how to fix it');
-  ok((await outText()).includes('Fix R1, top above'), 'result points at the field to fix');
+  ok((await status()).includes('Fix R1, top'), 'status names the field to fix');
   await p.fill('#tf-divider-r1', '10k'); ok(await p.getAttribute('#tf-divider-r1', 'aria-invalid') !== 'true', 'error clears while typing a valid value');
-  await p.fill('#tf-divider-r2', ''); ok((await outText()).includes('Enter R2, bottom'), 'missing input named in result');
-  await p.fill('#tf-divider-r2', '4k7');
+  await p.fill('#tf-divider-vout', '');
   await p.keyboard.press('k'); ok(await p.inputValue('#expr') === '', 'typing in a tool field does not reach the calculator');
-  await p.fill('#tf-divider-r2', '4k7');
-  await mode('Pick R1, R2'); await p.fill('#tf-divider-vin', '5');
-  ok((await p.isVisible('#tf-divider-vt')) && !(await p.isVisible('#tf-divider-r1')), 'pick mode shows only its own inputs');
-  ok((await outText()).includes('E24 series') && (await outText()).includes('Vout you get'), 'pick mode result: ' + (await outText()).slice(0, 80));
+  await p.fill('#tf-divider-vout', '');
+  // LED
   await p.click('#toolTabs button[data-tab="led"]');
-  ok((await outText()).includes('Resistor300Ω'), 'LED 5V/2V/10mA → 300Ω (E24): ' + (await outText()).slice(0, 80));
-  await p.locator('.out', { hasText: 'Resistor' }).first().locator('.use').click();
+  ok(await ph('#tf-led-r') === '= 300Ω', 'LED R calculated: ' + await ph('#tf-led-r'));
+  await p.fill('#tf-led-i', '9m'); ok((await p.textContent('#tf-led-r-note')).startsWith('E24 rounded up: 360Ω'), 'LED rounds up to series');
+  await p.fill('#tf-led-i', '10m');
+  await p.click('#tf-led-r-use');
   ok(await p.isHidden('#tools') && await p.inputValue('#expr') === '300', 'Use inserts value and closes: ' + await p.inputValue('#expr'));
   await p.click('#seriesSeg button[data-s="E12"]');
-  await p.click('.key.tools'); ok((await outText()).includes('Resistor330Ω'), 'series switch applies to tools (E12 → 330Ω)');
-  await p.click('#toolTabs button[data-tab="ohm"]'); ok((await outText()).includes('Current5mA'), 'Ohm 5V/1k → 5mA');
+  await p.click('.key.tools'); await p.fill('#tf-led-i', '9m');
+  ok((await p.textContent('#tf-led-r-note')).startsWith('E12 rounded up: 390Ω'), 'series switch applies to tools');
+  await p.fill('#tf-led-i', '10m');
+  // Ohm
+  await p.click('#toolTabs button[data-tab="ohm"]');
+  ok(await ph('#tf-ohm-i') === '= 5mA' && await ph('#tf-ohm-p') === '= 25mW', 'Ohm: both empty fields calculated');
   ok(await p.isHidden('#toolModes'), 'single-mode tool hides the mode switch');
-  await p.fill('#tf-ohm-i', '1m'); ok((await outText()).includes('exactly two'), 'Ohm with three values asks for two');
+  await p.fill('#tf-ohm-i', '1m'); ok((await status()).includes('exactly two'), 'Ohm with three values asks for two');
   await p.fill('#tf-ohm-i', '');
-  await p.click('#toolTabs button[data-tab="rc"]'); await mode('RC filter'); ok((await outText()).includes('1.592kHz'), 'RC cutoff 1.592kHz');
-  await mode('Reactance'); await p.fill('#tf-rc-c', ''); await p.fill('#tf-rc-l', ''); ok((await outText()).includes('Enter C, L or both'), 'reactance needs C or L');
-  await p.fill('#tf-rc-c', '10n');
+  // RC / LC / reactance
+  await p.click('#toolTabs button[data-tab="rc"]');
+  await p.click('#toolModes button:text-is("RC filter")'); ok(await ph('#tf-rc-fc') === '= 1.592kHz', 'RC cutoff 1.592kHz');
+  await p.fill('#tf-rc-fc', '1k'); await p.fill('#tf-rc-c', ''); ok(await ph('#tf-rc-c') === '= 15.92nF', 'C from R and fc: ' + await ph('#tf-rc-c'));
+  await p.fill('#tf-rc-fc', ''); await p.fill('#tf-rc-c', '10n');
+  await p.click('#toolModes button:text-is("X_C")'); ok(await ph('#tf-xc-x') === '= 15.92kΩ', 'X_C at 1kHz, 10nF');
   await p.keyboard.press('Escape'); ok(await p.isHidden('#tools'), 'Escape closes Tools');
-  await p.click('.key.tools'); ok(await p.getAttribute('#toolModes button:text-is("Reactance")', 'aria-pressed') === 'true', 'last tab and mode remembered');
+  await p.click('.key.tools'); ok(await p.getAttribute('#toolModes button:text-is("X_C")', 'aria-pressed') === 'true', 'last tab and mode remembered');
   await p.click('#toolsDone'); await p.click('#seriesSeg button[data-s="E24"]');
 
   // physical keyboard
