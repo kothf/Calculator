@@ -4,7 +4,7 @@
   "private": true,
   "description": "Engineering calculator with SI prefixes (10n*100k = 1m), RKM notation, parallel operator and E-series",
   "scripts": {
-    "test": "node --test test/si.test.js test/tools.test.js test/units.test.js test/natural.test.js",
+    "test": "node --test test/si.test.js test/tools.test.js test/units.test.js test/natural.test.js test/games.test.js",
     "build": "node scripts/build.js",
     "test:e2e": "node scripts/build.js && node test/e2e.js"
   },
