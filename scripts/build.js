@@ -14,6 +14,7 @@ const pwa = path.join(dist, 'pwa');
 fs.mkdirSync(pwa, { recursive: true });
 fs.writeFileSync(path.join(dist, 'app.html'), fragment);
 
+fs.copyFileSync(path.join(root, 'web/haptics-test.html'), path.join(pwa, 'haptics-test.html'));
 for (const f of ['icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png']) fs.copyFileSync(path.join(root, 'web/icons', f), path.join(pwa, f));
 fs.writeFileSync(path.join(pwa, 'manifest.webmanifest'), JSON.stringify({
   name: 'PrefixCalc', short_name: 'PrefixCalc', start_url: './', scope: './', display: 'standalone',
