@@ -68,6 +68,7 @@ After the first launch the app works without internet.
 | `src/natural.js` | Calc mode core: expression tree, cursor editing, exact evaluation (fractions, surds, π), result forms. No dependencies. |
 | `src/si.js` | SI mode: parser, evaluation, formatting, E-series. No dependencies. |
 | `src/tools.js` | Divider, RC/LC, LED resistor, Ohm's law. Depends only on `si.js`. |
+| `src/games.js` | Hidden logic games (Code, Flip, Slide). The same hidden panel (hold the Haptics button) also has Device info and About. About is also linked at the bottom of Tools. |
 | `test/*.test.js` | Unit tests (`node:test`). |
 | `test/e2e.js`, `test/e2e-calc.js` | Browser checks of the built app. |
 | `web/app.src.html` | The UI: mode shell, Calc, SI and Tools. The `src/*.js` cores are inlined into it at build time. |

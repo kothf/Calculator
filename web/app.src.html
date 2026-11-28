@@ -290,6 +290,58 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 .fields select { width: 100%; box-sizing: border-box; font: 400 16px/1.2 var(--mono); color: var(--fg); background: var(--panel); border: 1px solid var(--muted); border-radius: 10px; padding: 10px; }
 .seg[hidden] { display: none; }
 #uStatus:empty { min-height: 0; margin-top: -14px; }
+/* ---------- hidden corner: games + About (hold Haptics) ---------- */
+.xtra { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column;
+  padding: max(10px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); box-sizing: border-box; }
+.xtra[hidden] { display: none; }
+.xtra-in { width: 100%; max-width: 480px; margin: 0 auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.xtra-head { display: flex; align-items: center; gap: 8px; }
+.xtra-head h2 { flex: 1; margin: 0; font: 600 17px/1.2 var(--sans); }
+.xtra-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.g-bar { display: flex; align-items: center; gap: 8px; font: 500 13px/1.3 var(--sans); color: var(--muted); }
+.g-bar .g-stat { flex: 1; }
+.g-help { margin: 0; color: var(--muted); font: 400 13px/1.45 var(--sans); }
+.g-win { margin: 0; color: var(--ok); font: 600 15px/1.3 var(--sans); }
+.g-grid { display: grid; gap: 6px; width: 100%; max-width: min(100%, calc(var(--H, 100dvh) * 0.5)); margin: 0 auto; }
+.gcell { position: relative; aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--line); background: var(--key-fn); display: flex;
+  align-items: center; justify-content: center; font: 600 22px/1 var(--mono); color: var(--fg); cursor: pointer; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+.gcell.on { background: var(--prefix); border-color: var(--prefix); box-shadow: 0 0 12px color-mix(in srgb, var(--prefix) 55%, transparent); }
+.gcell.tile { background: var(--key); }
+.gcell.tile.ok { color: var(--eq); }
+.gcell.gap { background: transparent; border-style: dashed; cursor: default; }
+.gcell:active { filter: brightness(.92); }
+.c-entry { display: flex; justify-content: center; gap: 8px; }
+.c-entry span { width: 44px; height: 52px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); display: flex; align-items: center; justify-content: center; font: 600 26px/1 var(--mono); }
+.c-entry span.cur { border-color: var(--eq); }
+.c-pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.c-pad .gcell { aspect-ratio: auto; height: clamp(38px, calc(var(--H, 100dvh) * 0.06), 52px); font-size: 20px; background: var(--key); }
+.c-pad .gcell.used { opacity: .35; }
+.c-pad .gcell.act { font: 600 15px/1 var(--sans); background: var(--key-fn); }
+.c-pad .gcell.go { background: var(--eq); color: var(--eq-fg); border-color: var(--eq); }
+.c-log { display: flex; flex-direction: column; gap: 4px; font: 500 17px/1.2 var(--mono); }
+.c-log div { display: flex; justify-content: space-between; padding: 6px 10px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); }
+.c-log b { font-weight: 600; letter-spacing: .1em; }
+.c-log i { font-style: normal; color: var(--muted); letter-spacing: .15em; }
+.c-log i em { font-style: normal; color: var(--ok); }
+.about { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 18px 8px; }
+.about h3 { margin: 6px 0 0; font: 700 24px/1.2 var(--sans); }
+.about .ab-ver { color: var(--muted); font: 500 13px/1.2 var(--sans); }
+.about .ab-who { margin-top: 14px; font: 600 17px/1.3 var(--sans); }
+.about .ab-call { font: 600 20px/1.2 var(--mono); letter-spacing: .08em; color: var(--prefix); }
+.about p { margin: 0; color: var(--muted); font: 400 13px/1.5 var(--sans); max-width: 30em; }
+.about a { color: var(--eq); }
+#xtraTabs, .xtra-head { flex: none; }
+#xtraTabs { grid-template-columns: repeat(5, 1fr); }
+.dev h4 { margin: 14px 0 6px; font: 600 12px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.dev h4:first-child { margin-top: 0; }
+.dev dl { margin: 0; display: grid; grid-template-columns: minmax(96px, 38%) 1fr; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
+.dev dt, .dev dd { margin: 0; padding: 7px 10px; border-top: 1px solid var(--line); font: 400 13px/1.35 var(--sans); }
+.dev dt { color: var(--muted); }
+.dev dd { font-family: var(--mono); word-break: break-word; -webkit-user-select: text; user-select: text; }
+.dev dt:first-of-type, .dev dd:first-of-type { border-top: 0; }
+.dev .g-bar { margin-top: 14px; justify-content: flex-end; }
+.about-link { margin: 18px 0 4px; text-align: center; }
+.linkbtn { border: 0; background: none; color: var(--muted); font: 500 13px/1 var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 8px; }
 </style>
 
 <div class="shell">
@@ -389,6 +441,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <div class="fields" id="toolFields" role="group" aria-label="Values"></div>
     <p class="tool-status" id="toolStatus" aria-live="polite"></p>
     <section class="result" id="toolOut" aria-labelledby="alsoTitle" hidden></section>
+    <p class="about-link"><button class="linkbtn" id="aboutBtn">About PrefixCalc</button></p>
   </div>
 </div>
 <div class="mode tools-mode" id="mode-units" data-mode="units" hidden>
@@ -436,6 +489,15 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     </section>
   </div>
 </div>
+</div>
+<div class="xtra" id="xtra" role="dialog" aria-modal="true" aria-labelledby="xtraTitle" hidden>
+  <div class="xtra-in">
+    <div class="xtra-head"><h2 id="xtraTitle" tabindex="-1">Back room</h2><button class="chip" id="xtraClose">Close</button></div>
+    <div class="tabs" role="tablist" id="xtraTabs">
+      <button role="tab" data-x="code">Code</button><button role="tab" data-x="flip">Flip</button><button role="tab" data-x="slide">Slide</button><button role="tab" data-x="device">Device</button><button role="tab" data-x="about">About</button>
+    </div>
+    <div class="xtra-body" id="xtraBody"></div>
+  </div>
 </div>
 <div class="toast" id="toast">Copied</div>
 
@@ -1683,6 +1745,276 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   } });
 
   PC.register({ id: 'units', title: 'Units', el: $('mode-units'), show: function () { showTab(st.tab); } });
+})();
+</script>
+<script>
+/*__GAMES_JS__*/
+</script>
+<script>
+// ---------- hidden corner: hold Haptics for 0.7 s → logic games and About ----------
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var G = GAMES, store = PC.store, box = $('xtra'), body = $('xtraBody'), tab = store.get('x:tab', 'code');
+  var best = store.get('x:best', {}), games = {};
+  function h(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function cell(cls, text, fn) { var c = PC.tactile(h('label', 'gcell ' + cls, text)); c.addEventListener('click', function () { PC.buzz(); fn(); }); return c; }
+  function bar(stat, onNew) {
+    var b = h('div', 'g-bar'); b.appendChild(h('span', 'g-stat', stat));
+    var n = h('button', 'chip', 'New game'); n.addEventListener('click', function () { PC.buzz(); onNew(); }); b.appendChild(n); return b;
+  }
+  function record(id, score) {
+    var nb = best[id] == null || score < best[id];
+    if (nb) { best[id] = score; store.set('x:best', best); }
+    return nb;
+  }
+  function pl(n, w) { return n + ' ' + w + (n === 1 ? '' : /s$/.test(w) ? 'es' : 's'); }
+  function bestTxt(id, unit) { return best[id] == null ? '' : ' · best ' + pl(best[id], unit); }
+
+  // ---------- Code ----------
+  var entry = '';
+  function code() {
+    var st = games.code || (games.code = G.codeNew(4));
+    body.appendChild(bar(pl(st.guesses.length, 'guess') + bestTxt('code', 'guess'), function () { games.code = null; entry = ''; render(); }));
+    body.appendChild(h('p', 'g-help', 'Find the 4 different digits. ● right digit in the right place, ○ right digit in another place.'));
+    var log = h('div', 'c-log');
+    st.guesses.slice().reverse().forEach(function (g) {
+      var r = h('div'); r.appendChild(h('b', null, g.guess));
+      var s = h('i'); s.appendChild(h('em', null, '●'.repeat(g.exact))); s.appendChild(document.createTextNode('○'.repeat(g.near) + '·'.repeat(st.len - g.exact - g.near)));
+      r.appendChild(s); log.appendChild(r);
+    });
+    if (st.won) { body.appendChild(h('p', 'g-win', 'Solved in ' + st.guesses.length + (st.newBest ? ' guesses, a new best!' : ' guesses.'))); body.appendChild(log); return; }
+    var e = h('div', 'c-entry');
+    for (var i = 0; i < st.len; i++) e.appendChild(h('span', i === entry.length ? 'cur' : '', entry[i] || ''));
+    body.appendChild(e);
+    var pad = h('div', 'c-pad');
+    '1234567890'.split('').forEach(function (d) {
+      pad.appendChild(cell(entry.indexOf(d) >= 0 ? 'used' : '', d, function () { if (entry.length < st.len && entry.indexOf(d) < 0) { entry += d; render(); } }));
+    });
+    pad.appendChild(cell('act', '⌫', function () { entry = entry.slice(0, -1); render(); }));
+    pad.appendChild(cell('act', 'Clear', function () { entry = ''; render(); }));
+    var go = cell('act go', 'Guess', function () {
+      var err = G.codeGuess(st, entry);
+      if (err) { PC.toast(err); return; }
+      entry = '';
+      if (st.won) st.newBest = record('code', st.guesses.length);
+      render();
+    });
+    go.style.gridColumn = 'span 3';
+    pad.appendChild(go);
+    body.appendChild(pad); body.appendChild(log);
+  }
+
+  // ---------- Flip ----------
+  function flip() {
+    var st = games.flip || (games.flip = G.flipNew(5));
+    body.appendChild(bar(pl(st.moves, 'move') + bestTxt('flip', 'move'), function () { games.flip = null; render(); }));
+    body.appendChild(st.won ? h('p', 'g-win', 'All dark in ' + st.moves + (st.newBest ? ' moves, a new best!' : ' moves.'))
+      : h('p', 'g-help', 'Tapping a cell flips it and its neighbours. Switch every light off.'));
+    var g = h('div', 'g-grid'); g.style.gridTemplateColumns = 'repeat(' + st.n + ', 1fr)';
+    st.cells.forEach(function (v, i) {
+      g.appendChild(cell(v ? 'on' : '', '', function () {
+        if (st.won) return;
+        G.flipTap(st, i);
+        if (st.won) st.newBest = record('flip', st.moves);
+        render();
+      }));
+    });
+    body.appendChild(g);
+  }
+
+  // ---------- Slide ----------
+  function slide() {
+    var st = games.slide || (games.slide = G.slideNew(4));
+    body.appendChild(bar(pl(st.moves, 'move') + bestTxt('slide', 'move'), function () { games.slide = null; render(); }));
+    body.appendChild(st.won ? h('p', 'g-win', 'In order after ' + st.moves + (st.newBest ? ' moves, a new best!' : ' moves.'))
+      : h('p', 'g-help', 'Put the tiles in order 1 to 15. Tap a tile in the gap’s row or column to slide it.'));
+    var g = h('div', 'g-grid'); g.style.gridTemplateColumns = 'repeat(' + st.n + ', 1fr)';
+    st.tiles.forEach(function (v, i) {
+      if (!v) { g.appendChild(h('div', 'gcell gap')); return; }
+      g.appendChild(cell('tile' + (v === i + 1 ? ' ok' : ''), String(v), function () {
+        if (st.won || !G.slideTap(st, i)) return;
+        if (st.won) st.newBest = record('slide', st.moves);
+        render();
+      }));
+    });
+    body.appendChild(g);
+  }
+
+  // ---------- Device: everything the browser will tell about this phone ----------
+  var IPHONES = {
+    '320x568@2': 'iPhone SE (1st gen), 5s', '375x667@2': 'iPhone SE (2nd/3rd gen), 6–8', '414x736@3': 'iPhone 6–8 Plus',
+    '375x812@3': 'iPhone X, XS, 11 Pro, 12 mini, 13 mini', '414x896@2': 'iPhone XR, 11', '414x896@3': 'iPhone XS Max, 11 Pro Max',
+    '390x844@3': 'iPhone 12, 12 Pro, 13, 13 Pro, 14, 16e', '428x926@3': 'iPhone 12/13 Pro Max, 14 Plus',
+    '393x852@3': 'iPhone 14 Pro, 15, 15 Pro, 16', '430x932@3': 'iPhone 14 Pro Max, 15 Plus, 15 Pro Max, 16 Plus',
+    '402x874@3': 'iPhone 16 Pro, 17, 17 Pro', '440x956@3': 'iPhone 16 Pro Max, 17 Pro Max', '420x912@3': 'iPhone Air'
+  };
+  function mq(q) { return matchMedia(q).matches; }
+  function first(list) { for (var i = 0; i < list.length; i++) if (mq(list[i][0])) return list[i][1]; return '—'; }
+  function gpu() {
+    try {
+      var c = document.createElement('canvas'), gl = c.getContext('webgl2') || c.getContext('webgl');
+      if (!gl) return ['—', '—'];
+      var ext = gl.getExtension('WEBGL_debug_renderer_info');
+      var r = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      var v = ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+      return [v + ' · ' + r, (gl.getParameter(gl.VERSION) || '') + ' · max texture ' + gl.getParameter(gl.MAX_TEXTURE_SIZE)];
+    } catch (e) { return ['—', '—']; }
+  }
+  function osInfo(ua) {
+    var m;
+    // since iOS 26 the OS part of the user agent is frozen; Safari's own version follows iOS
+    var sv = ua.match(/Version\/(\d+)\.(\d+)(?:\.(\d+))?/);
+    if (/iPhone|iPad|iPod/.test(ua) && sv && +sv[1] >= 26) return 'iOS ' + sv[1] + '.' + sv[2] + (sv[3] ? '.' + sv[3] : '');
+    if ((m = ua.match(/(iPhone|iPad|iPod).*? OS (\d+)[_.](\d+)(?:[_.](\d+))?/))) return 'iOS ' + m[2] + '.' + m[3] + (m[4] ? '.' + m[4] : '') + (+m[2] >= 18 ? ' or later (frozen in user agent)' : '');
+    if ((m = ua.match(/Android ([\d.]+)/))) return 'Android ' + m[1];
+    if ((m = ua.match(/Mac OS X ([\d_]+)/))) return 'macOS ' + m[1].replace(/_/g, '.');
+    if (/Windows NT/.test(ua)) return 'Windows'; if (/Linux/.test(ua)) return 'Linux';
+    return '—';
+  }
+  function browserInfo(ua) {
+    var m;
+    if ((m = ua.match(/CriOS\/([\d.]+)/))) return 'Chrome ' + m[1] + ' (WebKit)';
+    if ((m = ua.match(/FxiOS\/([\d.]+)/))) return 'Firefox ' + m[1] + ' (WebKit)';
+    if ((m = ua.match(/EdgA?\/([\d.]+)/))) return 'Edge ' + m[1];
+    if ((m = ua.match(/Chrome\/([\d.]+)/))) return 'Chrome ' + m[1];
+    if ((m = ua.match(/Version\/([\d.]+).*Safari/))) return 'Safari ' + m[1];
+    if (/AppleWebKit/.test(ua)) return 'WebKit (home-screen app)';
+    return '—';
+  }
+  function bytes(n) { if (n == null) return '—'; var u = ['B', 'KB', 'MB', 'GB', 'TB'], i = 0; while (n >= 1024 && i < 4) { n /= 1024; i++; } return (i ? n.toFixed(1) : n) + ' ' + u[i]; }
+  function yesNo(b) { return b ? 'yes' : 'no'; }
+  function deviceRows() {
+    var ua = navigator.userAgent, s = screen, dpr = window.devicePixelRatio || 1, vv = window.visualViewport;
+    var w = Math.min(s.width, s.height), hh = Math.max(s.width, s.height);
+    var probe = h('div'); probe.style.cssText = 'position:fixed;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+    document.body.appendChild(probe); var cs = getComputedStyle(probe);
+    var safe = [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map(function (x) { return parseFloat(x); }).join(' / ');
+    probe.remove();
+    var units = ['lvh', 'svh', 'dvh'].map(function (u) { var x = h('div'); x.style.cssText = 'position:absolute;height:100' + u; document.body.appendChild(x); var v = Math.round(x.getBoundingClientRect().height); x.remove(); return v; }).join(' / ');
+    var g = gpu(), nav = navigator, conn = nav.connection;
+    var model = /iPhone/.test(ua) ? (IPHONES[w + 'x' + hh + '@' + dpr] || 'iPhone (unknown size)') : (/iPad/.test(ua) || (/Macintosh/.test(ua) && nav.maxTouchPoints > 1)) ? 'iPad' :
+      ((ua.match(/Android [\d.]+; ([^;)]+)/) || [])[1] || '—');
+    return [
+      ['Device', [
+        ['Model', model + (/iPhone/.test(ua) ? ' (from screen size)' : '')],
+        ['System', osInfo(ua)], ['Browser', browserInfo(ua)],
+        ['Running as', (nav.standalone || mq('(display-mode: standalone)')) ? 'home-screen app' : 'browser tab'],
+        ['Platform', nav.platform || '—'], ['Vendor', nav.vendor || '—'],
+        ['Language', (nav.languages || [nav.language]).join(', ')],
+        ['Time zone', (Intl.DateTimeFormat().resolvedOptions().timeZone || '—') + ' (UTC' + (function (o) { return (o <= 0 ? '+' : '−') + Math.floor(Math.abs(o) / 60) + (Math.abs(o) % 60 ? ':' + String(Math.abs(o) % 60).padStart(2, '0') : ''); })(new Date().getTimezoneOffset()) + ')']
+      ]],
+      ['Display', [
+        ['Screen', w + ' × ' + hh + ' pt'], ['Pixels', Math.round(w * dpr) + ' × ' + Math.round(hh * dpr) + ' px'],
+        ['Pixel ratio', '@' + dpr + 'x'], ['Refresh rate', '<measuring…>'],
+        ['Colour', s.colorDepth + '-bit · ' + first([['(color-gamut: rec2020)', 'Rec.2020'], ['(color-gamut: p3)', 'Display P3'], ['(color-gamut: srgb)', 'sRGB']])],
+        ['HDR', mq('(dynamic-range: high)') ? 'yes' : 'no'],
+        ['Orientation', (s.orientation && s.orientation.type) || (mq('(orientation: portrait)') ? 'portrait' : 'landscape')],
+        ['Theme', (mq('(prefers-color-scheme: dark)') ? 'dark' : 'light') + (mq('(prefers-reduced-motion: reduce)') ? ' · reduced motion' : '') + (mq('(prefers-contrast: more)') ? ' · high contrast' : '')]
+      ]],
+      ['Viewport', [
+        ['Window', innerWidth + ' × ' + innerHeight], ['Visual viewport', vv ? Math.round(vv.width) + ' × ' + Math.round(vv.height) : '—'],
+        ['Safe area t/r/b/l', safe], ['100 lvh / svh / dvh', units],
+        ['App height', getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim() || 'CSS (100dvh)']
+      ]],
+      ['Hardware', [
+        ['CPU cores', nav.hardwareConcurrency ? String(nav.hardwareConcurrency) : 'not exposed'],
+        ['Memory', nav.deviceMemory ? '≥ ' + nav.deviceMemory + ' GB' : 'not exposed'],
+        ['GPU', g[0]], ['Graphics', g[1]], ['WebGPU', yesNo('gpu' in nav)],
+        ['Touch points', String(nav.maxTouchPoints || 0)],
+        ['Pointer', (mq('(pointer: coarse)') ? 'finger' : mq('(pointer: fine)') ? 'mouse/pen' : 'none') + (mq('(hover: hover)') ? ' · hover' : '')],
+        ['Battery', '<reading…>'], ['Storage', '<reading…>']
+      ]],
+      ['Features', [
+        ['Network', conn ? [conn.effectiveType, conn.downlink != null ? conn.downlink + ' Mb/s' : '', conn.saveData ? 'data saver' : ''].filter(Boolean).join(' · ') : (nav.onLine ? 'online' : 'offline')],
+        ['Haptics', nav.vibrate ? 'Vibration API' : 'iOS switch tick'],
+        ['Motion sensors', yesNo('DeviceMotionEvent' in window)], ['Location', yesNo('geolocation' in nav)],
+        ['Camera / mic', yesNo(!!(nav.mediaDevices && nav.mediaDevices.getUserMedia))],
+        ['Bluetooth / USB / NFC', ['bluetooth', 'usb', 'NDEFReader'].map(function (k) { return yesNo(k === 'NDEFReader' ? k in window : k in nav); }).join(' / ')],
+        ['Share sheet', yesNo(!!nav.share)], ['Cookies', yesNo(nav.cookieEnabled)]
+      ]],
+      ['Raw', [['User agent', ua]]]
+    ];
+  }
+  var devRows = null;
+  function device() {
+    devRows = deviceRows();
+    var wrap = h('div', 'dev');
+    devRows.forEach(function (sec) {
+      wrap.appendChild(h('h4', null, sec[0]));
+      var dl = h('dl');
+      sec[1].forEach(function (r) { var dt = h('dt', null, r[0]), dd = h('dd', null, r[1]); dd.dataset.k = r[0]; dl.appendChild(dt); dl.appendChild(dd); });
+      wrap.appendChild(dl);
+    });
+    var acts = h('div', 'g-bar');
+    var cp = h('button', 'chip', 'Copy all'); cp.addEventListener('click', function () {
+      var txt = devRows.map(function (sec) { return sec[0] + '\n' + sec[1].map(function (r) { var d = body.querySelector('dd[data-k="' + r[0] + '"]'); return '  ' + r[0] + ': ' + (d ? d.textContent : r[1]); }).join('\n'); }).join('\n');
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { PC.toast('Copied'); }, function () { PC.toast('Copy not allowed'); });
+    });
+    var fr = h('button', 'chip', 'Screen frames'); fr.addEventListener('click', function () { close(); frames(); });
+    acts.appendChild(cp); acts.appendChild(fr); wrap.appendChild(acts);
+    body.appendChild(wrap);
+    function set(k, v) { var d = body.querySelector('dd[data-k="' + k + '"]'); if (d) d.textContent = v; }
+    // refresh rate: count frames for about half a second
+    var n = 0, t0 = 0;
+    requestAnimationFrame(function tick(t) { if (!t0) t0 = t; n++; if (t - t0 < 500) requestAnimationFrame(tick); else set('Refresh rate', '≈ ' + Math.round((n - 1) * 1000 / (t - t0)) + ' Hz (Low Power Mode caps it at 60)'); });
+    if (navigator.getBattery) navigator.getBattery().then(function (b) { set('Battery', Math.round(b.level * 100) + '%' + (b.charging ? ' · charging' : '')); }, function () { set('Battery', 'not exposed'); });
+    else set('Battery', 'not exposed');
+    if (navigator.storage && navigator.storage.estimate) navigator.storage.estimate().then(function (e) { set('Storage', bytes(e.usage) + ' used of ' + bytes(e.quota) + ' allowed to this app'); }, function () { set('Storage', '—'); });
+    else set('Storage', '—');
+  }
+  // coloured frames show where each height ends; tap anywhere to remove them
+  function frames() {
+    var list = [['bottom:0', 'red'], ['height:100lvh;border-width:0 0 6px', 'lime'], ['height:100dvh;border-width:0 0 9px', 'dodgerblue'], ['height:' + screen.height + 'px;border-width:0 0 12px', 'gold']].map(function (f) {
+      var d = h('div'); d.style.cssText = 'position:fixed;left:0;right:0;top:0;pointer-events:none;z-index:99;box-sizing:border-box;border:3px solid ' + f[1] + ';' + f[0];
+      document.documentElement.appendChild(d); return d;
+    });
+    PC.toast('Red fixed · green lvh · blue dvh · gold screen');
+    setTimeout(function () { document.addEventListener('pointerdown', function off() { list.forEach(function (d) { d.remove(); }); document.removeEventListener('pointerdown', off, true); }, true); }, 50);
+  }
+
+  // ---------- About ----------
+  function about() {
+    var a = h('div', 'about');
+    a.appendChild(h('h3', null, 'PrefixCalc'));
+    a.appendChild(h('div', 'ab-ver', 'Scientific · SI prefixes · Tools · Units'));
+    a.appendChild(h('div', 'ab-who', 'Andrey Dumchin'));
+    a.appendChild(h('div', 'ab-call', '4X5VA'));
+    var p = h('p'); p.appendChild(document.createTextNode('Free. Works offline. '));
+    var l = h('a', null, 'github.com/kothf/prefix_calc'); l.href = 'https://github.com/kothf/prefix_calc'; l.target = '_blank'; l.rel = 'noopener';
+    p.appendChild(l); a.appendChild(p);
+    var d = h('button', 'linkbtn', 'Device info'); d.addEventListener('click', function () { tab = 'device'; render(); }); a.appendChild(d);
+    body.appendChild(a);
+  }
+
+  var VIEWS = { code: code, flip: flip, slide: slide, device: device, about: about };
+  function render() {
+    var y = body.scrollTop;
+    body.textContent = '';
+    $('xtraTabs').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.x === tab)); });
+    VIEWS[tab]();
+    body.scrollTop = y;
+  }
+  function open(which) {
+    if (which) tab = which;
+    box.hidden = false; render(); $('xtraTitle').focus();
+  }
+  function close() { box.hidden = true; $('hapticBtn').focus(); }
+  $('xtraTabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    PC.buzz(); tab = b.dataset.x; store.set('x:tab', tab); body.scrollTop = 0; render();
+  });
+  $('xtraClose').addEventListener('click', function () { PC.buzz(); close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) close(); });
+  $('aboutBtn').addEventListener('click', function () { open('about'); });
+
+  // a long press on Haptics opens the corner; it must not also toggle haptics
+  var btn = $('hapticBtn'), t = null, held = false;
+  btn.addEventListener('pointerdown', function () { held = false; clearTimeout(t); t = setTimeout(function () { held = true; PC.buzz(); open(); }, 700); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { btn.addEventListener(ev, function () { clearTimeout(t); }); });
+  btn.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  document.addEventListener('click', function (e) { if (held && e.target === btn) { held = false; e.stopPropagation(); } }, true);
+  PC.openCorner = open;
 })();
 </script>
 <script>PC.start();</script>

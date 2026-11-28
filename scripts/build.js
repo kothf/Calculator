@@ -1,4 +1,4 @@
-// Builds two outputs from web/app.src.html + src/si.js + src/tools.js + src/natural.js + src/units.js:
+// Builds two outputs from web/app.src.html + src/si.js + src/tools.js + src/natural.js + src/units.js + src/games.js:
 //   dist/app.html  – page fragment (no <html>/<head>), used for the claude.ai artifact preview
 //   dist/pwa/      – standalone installable PWA (index.html + manifest + service worker + icon), works offline
 const fs = require('fs');
@@ -9,7 +9,8 @@ const core = fs.readFileSync(path.join(root, 'src/si.js'), 'utf8');
 const tools = fs.readFileSync(path.join(root, 'src/tools.js'), 'utf8');
 const nat = fs.readFileSync(path.join(root, 'src/natural.js'), 'utf8');
 const units = fs.readFileSync(path.join(root, 'src/units.js'), 'utf8');
-const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools).replace('/*__NAT_JS__*/', () => nat).replace('/*__UNITS_JS__*/', () => units);
+const games = fs.readFileSync(path.join(root, 'src/games.js'), 'utf8');
+const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools).replace('/*__NAT_JS__*/', () => nat).replace('/*__UNITS_JS__*/', () => units).replace('/*__GAMES_JS__*/', () => games);
 const dist = path.join(root, 'dist');
 const pwa = path.join(dist, 'pwa');
 fs.mkdirSync(pwa, { recursive: true });
@@ -63,51 +64,6 @@ const head = `<!doctype html>
 <body>
 `;
 const tail = `
-<script>
-// Hidden screen diagnostics: hold the Haptics button for 1.5 s. Frames show where each height ends:
-// red = fixed inset 0, green = 100lvh, blue = 100dvh, yellow = screen.height.
-(function () {
-  var btn = document.getElementById('hapticBtn'), t = null;
-  if (!btn) return;
-  var held = false;
-  btn.addEventListener('pointerdown', function () { held = false; t = setTimeout(function () { held = true; show(); }, 1500); });
-  // a long press must not also toggle haptics
-  document.addEventListener('click', function (e) { if (held && e.target === btn) { held = false; e.stopPropagation(); } }, true);
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (e) { btn.addEventListener(e, function () { clearTimeout(t); }); });
-  function frame(css, color) {
-    var d = document.createElement('div');
-    d.style.cssText = 'position:fixed;left:0;right:0;top:0;pointer-events:none;z-index:99;box-sizing:border-box;border:3px solid ' + color + ';' + css;
-    document.documentElement.appendChild(d); return d;
-  }
-  function show() {
-    if (document.getElementById('diag')) { document.querySelectorAll('.diagf, #diag').forEach(function (e) { e.remove(); }); return; }
-    var f = [frame('bottom:0', 'red'), frame('height:100lvh;border-width:0 0 6px', 'lime'), frame('height:100dvh;border-width:0 0 9px', 'dodgerblue'),
-      frame('height:' + screen.height + 'px;border-width:0 0 12px', 'yellow')];
-    f.forEach(function (e) { e.className = 'diagf'; });
-    var probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
-    document.body.appendChild(probe);
-    var cs = getComputedStyle(probe), vv = window.visualViewport;
-    var rows = [
-      ['standalone', String(!!(navigator.standalone || matchMedia('(display-mode: standalone)').matches))],
-      ['screen', screen.width + '×' + screen.height + ' @' + devicePixelRatio],
-      ['inner', innerWidth + '×' + innerHeight], ['outer', outerWidth + '×' + outerHeight],
-      ['visualViewport', vv ? Math.round(vv.width) + '×' + Math.round(vv.height) + ' top ' + Math.round(vv.offsetTop) : '—'],
-      ['clientHeight', document.documentElement.clientHeight],
-      ['body', Math.round(document.body.getBoundingClientRect().height)], ['--app-h', document.documentElement.style.getPropertyValue('--app-h')],
-      ['safe area t/r/b/l', [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].join(' ')],
-      ['100lvh / 100dvh / 100svh', ['lvh', 'dvh', 'svh'].map(function (u) { var x = document.createElement('div'); x.style.cssText = 'position:absolute;height:100' + u; document.body.appendChild(x); var h = x.getBoundingClientRect().height; x.remove(); return Math.round(h); }).join(' / ')],
-      ['UA', navigator.userAgent.replace('Mozilla/5.0 ', '')]
-    ];
-    probe.remove();
-    var box = document.createElement('div'); box.id = 'diag';
-    box.style.cssText = 'position:fixed;left:12px;right:12px;top:30%;z-index:100;background:#fff;color:#000;font:13px/1.4 ui-monospace,Menlo,monospace;padding:12px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.5)';
-    box.innerHTML = '<b>Screen diagnostics</b> (hold Haptics again to close)<br>' + rows.map(function (r) { return r[0] + ': ' + String(r[1]).replace(/</g, '&lt;'); }).join('<br>') +
-      '<br><span style="color:red">red</span> fixed · <span style="color:green">green</span> lvh · <span style="color:dodgerblue">blue</span> dvh · <span style="color:#b90">yellow</span> screen';
-    document.body.appendChild(box);
-  }
-})();
-</script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});</script>
 </body>
 </html>
