@@ -5,6 +5,7 @@ const root = require('path').join(__dirname, '..', 'dist', 'pwa');
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const srv = http.createServer((q, r) => { let f = path.join(root, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html';
   fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'content-type': types[path.extname(f)] || 'text/plain' }); r.end(d); } }); });
+const calcChecks = require('./e2e-calc.js');
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ? 'PASS ' : 'FAIL ') + m); };
 (async () => {
   await new Promise(r => srv.listen(8765, r));
@@ -12,7 +13,9 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   const ctx = await b.newContext({ ...devices['Pixel 7'], permissions: ['clipboard-read', 'clipboard-write'] });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
   await p.goto('http://localhost:8765/'); await p.waitForTimeout(500);
-  const key = async k => p.click(`.key:text-is("${k}")`);
+  await calcChecks(p, ok);
+  await p.click('#modeTabs button[data-mode="si"]');
+  const key = async k => p.click(`#mode-si .key:text-is("${k}")`);
   const type = async ks => { for (const k of ks) await key(k); };
   const res = () => p.textContent('#result'); const expr = () => p.inputValue('#expr');
   ok(await res() === '1m', 'initial example 10n × 100k = 1m');
@@ -56,21 +59,21 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   ok(await p.evaluate(() => navigator.clipboard.readText()) === '3.197k', 'tap result copies 3.197k');
   ok((await p.textContent('#toast')).startsWith('Copied'), 'toast Copied');
   // = commits and continues
-  const before = await p.locator('.h-item').count();
+  const before = await p.locator('#mode-si .h-item').count();
   await key('=');
-  ok(await p.locator('.h-item').count() === before + 1, 'history +1 on =');
+  ok(await p.locator('#mode-si .h-item').count() === before + 1, 'history +1 on =');
   ok(await expr() === '3.197k', '= puts result in new line: ' + await expr());
   await key('×'); await key('2'); ok(await res() === '6.394k', 'continue calc: ' + await res());
   // history tap / long press
   await key('AC');
-  const last = p.locator('.h-item').last();
+  const last = p.locator('#mode-si .h-item').last();
   await last.click(); ok(await expr() === '3.197k', 'history tap inserts result: ' + await expr());
   await key('AC');
   const bb = await last.boundingBox(); await p.mouse.move(bb.x + 10, bb.y + 5); await p.mouse.down(); await p.waitForTimeout(650); await p.mouse.up();
   ok(await expr() === '3.197k', 'long press inserts expression: ' + await expr());
   // Tools sheet: one set of fields, the empty one is calculated in place
   await key('AC'); await p.click('#seriesSeg button[data-s="E24"]');
-  await p.click('.key.tools'); ok(await p.isVisible('#tools'), 'Tools opens');
+  await p.click('#mode-si .key.tools'); ok(await p.isVisible('#mode-tools'), 'Tools opens');
   await p.click('#toolTabs button[data-tab="divider"]');
   const ph = sel => p.getAttribute(sel, 'placeholder');
   const status = () => p.textContent('#toolStatus');
@@ -110,9 +113,9 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   await p.fill('#tf-led-i', '9m'); ok((await p.textContent('#tf-led-r-note')).startsWith('E24 rounded up: 360Ω'), 'LED rounds up to series');
   await p.fill('#tf-led-i', '10m');
   await p.click('#tf-led-r-use');
-  ok(await p.isHidden('#tools') && await p.inputValue('#expr') === '300', 'Use inserts value and closes: ' + await p.inputValue('#expr'));
+  ok(await p.isHidden('#mode-tools') && await p.inputValue('#expr') === '300', 'Use inserts value and goes back to SI: ' + await p.inputValue('#expr'));
   await p.click('#seriesSeg button[data-s="E12"]');
-  await p.click('.key.tools'); await p.fill('#tf-led-i', '9m');
+  await p.click('#mode-si .key.tools'); await p.fill('#tf-led-i', '9m');
   ok((await p.textContent('#tf-led-r-note')).startsWith('E12 rounded up: 390Ω'), 'series switch applies to tools');
   await p.fill('#tf-led-i', '10m');
   // Ohm
@@ -127,9 +130,9 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   await p.fill('#tf-rc-fc', '1k'); await p.fill('#tf-rc-c', ''); ok(await ph('#tf-rc-c') === '= 15.92nF', 'C from R and fc: ' + await ph('#tf-rc-c'));
   await p.fill('#tf-rc-fc', ''); await p.fill('#tf-rc-c', '10n');
   await p.click('#toolModes button:text-is("X_C")'); ok(await ph('#tf-xc-x') === '= 15.92kΩ', 'X_C at 1kHz, 10nF');
-  await p.keyboard.press('Escape'); ok(await p.isHidden('#tools'), 'Escape closes Tools');
-  await p.click('.key.tools'); ok(await p.getAttribute('#toolModes button:text-is("X_C")', 'aria-pressed') === 'true', 'last tab and mode remembered');
-  await p.click('#toolsDone'); await p.click('#seriesSeg button[data-s="E24"]');
+  await p.click('#modeTabs button[data-mode="si"]'); ok(await p.isHidden('#mode-tools'), 'mode bar leaves Tools');
+  await p.click('#mode-si .key.tools'); ok(await p.getAttribute('#toolModes button:text-is("X_C")', 'aria-pressed') === 'true', 'last tab and mode remembered');
+  await p.click('#modeTabs button[data-mode="si"]'); await p.click('#seriesSeg button[data-s="E24"]');
 
   // physical keyboard
   await key('AC'); await p.focus('#expr'); await p.keyboard.type('100m*100M'); ok(await res() === '10M', 'physical keyboard 100m*100M = 10M');
@@ -137,17 +140,17 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   await p.keyboard.press('Escape'); ok(await expr() === '', 'Escape clears');
   // history persists & capped at 50
   await p.reload(); await p.waitForTimeout(300);
-  ok(await p.locator('.h-item').count() >= 3, 'history persists after reload');
+  ok(await p.locator('#mode-si .h-item').count() >= 3, 'history persists after reload');
   for (let i = 0; i < 55; i++) { await p.fill('#expr', String(i)); await p.keyboard.press('Enter'); }
-  ok(await p.locator('.h-item').count() === 50, 'history capped at 50: ' + await p.locator('.h-item').count());
+  ok(await p.locator('#mode-si .h-item').count() === 50, 'history capped at 50: ' + await p.locator('#mode-si .h-item').count());
   await p.click('#clearHist'); await p.reload(); await p.waitForTimeout(300);
   // after clear, seed examples come back (no stored history)
-  ok(await p.locator('.h-item').count() === 0, 'cleared history stays empty after reload');
+  ok(await p.locator('#mode-si .h-item').count() === 0, 'cleared history stays empty after reload');
   // haptics toggle persists
   await p.click('#hapticBtn'); await p.reload(); ok(await p.getAttribute('#hapticBtn', 'aria-pressed') === 'false', 'haptics off persists'); await p.click('#hapticBtn');
   // layout: no horizontal overflow, keypad fits
   const ov = await p.evaluate(() => document.documentElement.scrollWidth > innerWidth); ok(!ov, 'no horizontal overflow');
-  const eqBox = await p.locator('.key.eq').boundingBox(); ok(eqBox.y + eqBox.height <= p.viewportSize().height, '= key visible without scroll');
+  const eqBox = await p.locator('#mode-si .key.eq').boundingBox(); ok(eqBox.y + eqBox.height <= p.viewportSize().height, '= key visible without scroll');
   // offline via service worker
   await p.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, { timeout: 5000 }).catch(() => {});
   await ctx.setOffline(true); await p.reload(); await p.waitForTimeout(300);
@@ -155,8 +158,10 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   await ctx.setOffline(false);
   // small phone
   const sm = await b.newPage({ viewport: { width: 320, height: 568 } }); await sm.goto('http://localhost:8765/'); await sm.waitForTimeout(300);
-  const eq2 = await sm.locator('.key.eq').boundingBox(); ok(!(await sm.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'iPhone SE: no overflow');
-  ok(eq2.y + eq2.height <= 568, 'iPhone SE: = key fits ' + (eq2.y + eq2.height)); await sm.screenshot({ path: require('path').join(require('os').tmpdir(), 'prefixcalc-se.png') });
+  const eq2 = await sm.locator('#mode-calc .key.eq').boundingBox(); ok(!(await sm.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'iPhone SE: no overflow');
+  ok(eq2.y + eq2.height <= 568, 'iPhone SE: Calc = key fits ' + (eq2.y + eq2.height));
+  await sm.click('#modeTabs button[data-mode="si"]'); const eq3 = await sm.locator('#mode-si .key.eq').boundingBox();
+  ok(eq3.y + eq3.height <= 568, 'iPhone SE: SI = key fits ' + (eq3.y + eq3.height)); await sm.screenshot({ path: require('path').join(require('os').tmpdir(), 'prefixcalc-se.png') });
   await b.close(); srv.close();
   console.log(fails.length ? `\n${fails.length} FAILED` : '\nALL PASSED');
 })();
