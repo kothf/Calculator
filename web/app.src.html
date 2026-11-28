@@ -1897,7 +1897,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
       ((ua.match(/Android [\d.]+; ([^;)]+)/) || [])[1] || '—');
     return [
       ['Device', [
-        ['Model', model + (/iPhone/.test(ua) ? ' (from screen size)' : '')],
+        ['Model', model + (/iPhone/.test(ua) ? (/,/.test(model) ? ' (same screen, the browser can’t tell them apart)' : ' (from screen size)') : '')],
         ['System', osInfo(ua)], ['Browser', browserInfo(ua)],
         ['Running as', (nav.standalone || mq('(display-mode: standalone)')) ? 'home-screen app' : 'browser tab'],
         ['Platform', nav.platform || '—'], ['Vendor', nav.vendor || '—'],
@@ -1957,7 +1957,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     function set(k, v) { var d = body.querySelector('dd[data-k="' + k + '"]'); if (d) d.textContent = v; }
     // refresh rate: count frames for about half a second
     var n = 0, t0 = 0;
-    requestAnimationFrame(function tick(t) { if (!t0) t0 = t; n++; if (t - t0 < 500) requestAnimationFrame(tick); else set('Refresh rate', '≈ ' + Math.round((n - 1) * 1000 / (t - t0)) + ' Hz (Low Power Mode caps it at 60)'); });
+    requestAnimationFrame(function tick(t) { if (!t0) t0 = t; n++; if (t - t0 < 500) requestAnimationFrame(tick); else var hz = Math.round((n - 1) * 1000 / (t - t0)); set('Refresh rate', '≈ ' + hz + ' Hz' + (hz < 66 && /AppleWebKit/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent) ? ' (iOS gives web pages at most 60)' : '')); });
     if (navigator.getBattery) navigator.getBattery().then(function (b) { set('Battery', Math.round(b.level * 100) + '%' + (b.charging ? ' · charging' : '')); }, function () { set('Battery', 'not exposed'); });
     else set('Battery', 'not exposed');
     if (navigator.storage && navigator.storage.estimate) navigator.storage.estimate().then(function (e) { set('Storage', bytes(e.usage) + ' used of ' + bytes(e.quota) + ' allowed to this app'); }, function () { set('Storage', '—'); });
