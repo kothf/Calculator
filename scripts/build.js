@@ -7,7 +7,8 @@ const root = path.join(__dirname, '..');
 const src = fs.readFileSync(path.join(root, 'web/app.src.html'), 'utf8');
 const core = fs.readFileSync(path.join(root, 'src/si.js'), 'utf8');
 const tools = fs.readFileSync(path.join(root, 'src/tools.js'), 'utf8');
-const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools);
+const nat = fs.readFileSync(path.join(root, 'src/natural.js'), 'utf8');
+const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools).replace('/*__NAT_JS__*/', () => nat);
 const dist = path.join(root, 'dist');
 const pwa = path.join(dist, 'pwa');
 fs.mkdirSync(pwa, { recursive: true });
@@ -42,7 +43,26 @@ const head = `<!doctype html>
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-title" content="PrefixCalc">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
+<style>html,body{height:100%;margin:0;overflow:hidden}body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);font-size:14px}.shell{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
+<script>
+// iOS home-screen apps can report a viewport shorter than the screen (the status bar height is lost at the
+// bottom). The app is one fixed screen, so size it to the full screen when it runs standalone.
+(function () {
+  var standalone = navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  function fit() {
+    var h = window.innerHeight;
+    if (standalone) {
+      var portrait = window.innerWidth < window.innerHeight;
+      var sh = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+      if (sh > h) h = sh;
+    }
+    document.documentElement.style.setProperty('--app-h', h + 'px');
+  }
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('orientationchange', function () { setTimeout(fit, 300); });
+})();
+</script>
 </head>
 <body>
 `;

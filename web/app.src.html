@@ -146,16 +146,126 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 @media (max-height: 700px) { .key { height: 44px; } .key.px { height: 36px; } #result { font-size: 32px; } .key.small { height: 32px; } }
 @media (max-height: 600px) { .key { height: 40px; font-size: 19px; } .key.px { height: 32px; } .key.small { height: 30px; } #result { font-size: 28px; } #expr { font-size: 19px; } .app { gap: 6px; } }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } .key:active { transform: none; } }
+
+/* ---------- shell: mode bar + one mode on screen ---------- */
+.shell { height: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; }
+.modebar { display: flex; align-items: center; gap: 8px; padding: 8px max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px)); }
+.modetabs { display: flex; gap: 2px; padding: 3px; border-radius: 11px; background: var(--key-fn); }
+.modetabs button { border: 0; background: transparent; color: var(--muted); font: 600 13px/1 var(--sans); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+.modetabs button[aria-selected="true"] { background: var(--panel); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+.modebar .spacer { flex: 1; }
+.shell .app { height: auto; flex: 1 1 auto; min-height: 0; max-width: none; margin: 0; }
+.tools-mode { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-user-select: text; user-select: text; }
+.mode[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Calc: natural display ---------- */
+.ind { display: flex; align-items: center; gap: 5px; flex: none; font: 600 10px/1 var(--sans); letter-spacing: .06em; color: var(--muted); }
+.ind .flag { padding: 3px 5px; border-radius: 4px; background: var(--prefix-bg); color: var(--prefix); }
+.ind .flag[hidden] { display: none; }
+.ind-btn { font: 600 10px/1 var(--sans); letter-spacing: .06em; color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; cursor: pointer; }
+.ind .spacer { flex: 1; }
+.nat { font: 400 26px/1.25 var(--sans); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--fg); }
+.nat-in { min-height: 64px; display: flex; align-items: center; overflow-x: auto; overflow-y: hidden; padding: 6px 2px; scrollbar-width: none; cursor: text; touch-action: pan-y; }
+.nat-in::-webkit-scrollbar, .cres::-webkit-scrollbar { display: none; }
+.nat-in > .row { margin-left: auto; }
+.row { display: inline-block; white-space: nowrap; }
+.nat .op { margin: 0 .16em; }
+.nat .var { font-style: italic; }
+.nat .ans { font-size: .78em; font-weight: 600; letter-spacing: .02em; }
+.nat .comb { font-size: .82em; font-weight: 600; margin: 0 .1em; }
+.nat .fname { font-size: .9em; margin-right: .03em; }
+.nat .paren { display: inline-block; transform-origin: 50% 55%; }
+.t-frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 .1em; }
+.t-frac > .t-num { display: block; padding: 0 .14em .05em; border-bottom: max(1.5px, .065em) solid currentColor; }
+.t-frac > .t-den { display: block; padding: .07em .14em 0; }
+.t-sup { display: inline-block; font-size: .66em; vertical-align: .85em; margin-left: .04em; }
+.t-sub { display: inline-block; font-size: .66em; vertical-align: -.3em; }
+.t-x10 { white-space: nowrap; }
+.t-x10 .x10 { margin-left: .12em; }
+.t-sqrt { display: inline-block; position: relative; margin-left: .6em; padding: .1em .08em 0 .06em; border-top: max(1.5px, .065em) solid currentColor; }
+.t-sqrt > svg { position: absolute; left: -.6em; top: max(-1.5px, -.065em); width: .6em; height: calc(100% + .065em); overflow: visible; }
+.t-sqrt > svg path { fill: none; stroke: currentColor; stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.t-root > .t-idx { display: inline-block; font-size: .55em; vertical-align: .95em; margin-right: -1.15em; min-width: 1em; text-align: right; position: relative; }
+.t-abs > .bar { display: inline-block; width: 0; border-left: max(1.5px, .06em) solid currentColor; height: 1.1em; vertical-align: -.2em; margin: 0 .12em; transform-origin: 50% 55%; }
+.slot { display: inline-block; width: .6em; height: .82em; border: 1.5px dashed var(--muted); border-radius: 3px; vertical-align: -.06em; box-sizing: border-box; position: relative; }
+.slot.active { border-style: solid; border-color: var(--eq); }
+.slot.ghost { opacity: .6; }
+.caret { display: inline-block; width: 2px; height: 1.15em; margin: 0 -1px; vertical-align: -.22em; background: var(--eq); animation: blink 1.06s steps(1) infinite; position: relative; z-index: 1; }
+.slot > .caret { position: absolute; left: 1px; top: 1px; bottom: 1px; height: auto; margin: 0; }
+.done-state .caret { display: none; }
+@keyframes blink { 50% { opacity: 0; } }
+.cres { display: flex; align-items: center; min-height: 48px; overflow-x: auto; scrollbar-width: none; cursor: pointer; }
+.cres > .nat { margin-left: auto; font-size: 30px; font-weight: 500; }
+.cres.live > .nat { color: var(--muted); }
+.cres.err > .nat { color: var(--err); font-size: 18px; font-weight: 500; }
+.cres .pfx-badge { margin-left: 8px; font: 600 15px/1 var(--mono); color: var(--prefix); background: var(--prefix-bg); border-radius: 6px; padding: 4px 6px; flex: none; }
+.cfoot { display: flex; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 6px; min-height: 30px; }
+.calt { flex: 1; min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 10px; font: 400 14px/1.2 var(--mono); color: var(--muted); overflow: hidden; white-space: nowrap; }
+.calt .nat { font-size: 16px; color: var(--muted); }
+.calt .send { font: 600 12px/1 var(--sans); color: var(--eq); background: transparent; border: 1px solid var(--res-line); border-radius: 8px; padding: 6px 8px; cursor: pointer; }
+.calt .send .pfx { color: var(--prefix); }
+.chist .h-item { align-items: center; padding: 4px; }
+.chist .h-expr { overflow: visible; }
+.chist .nat { font-size: 15px; }
+.chist .h-expr { color: var(--muted); }
+.chist .h-expr .nat { color: var(--muted); }
+.fkeys { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; position: relative; }
+.key.f { height: 42px; font: 500 15px/1 var(--sans); background: var(--key-fn); position: relative; padding: 9px 0 0; }
+.key .sl { position: absolute; top: 3px; left: 0; right: 0; font: 600 9.5px/1 var(--sans); color: var(--prefix); white-space: nowrap; }
+.key .ml sup, .key .sl sup { font-size: .7em; line-height: 0; }
+.key .ml sub, .key .sl sub { font-size: .7em; line-height: 0; }
+.key.f.nav { padding: 0; font-size: 14px; }
+.key.shift[aria-pressed="true"], .key.hyp[aria-pressed="true"] { background: var(--prefix); color: var(--bg); }
+.shift-on .key.f:not(.shift) .ml { opacity: .3; }
+.shift-on .key .sl { font-size: 11px; top: 2px; }
+.kbox { display: inline-block; width: .55em; height: .62em; border: 1.2px solid currentColor; border-radius: 2px; vertical-align: -.05em; box-sizing: border-box; }
+.kfrac { display: inline-flex; flex-direction: column; align-items: center; gap: 1.5px; vertical-align: middle; }
+.kfrac i { display: block; width: .6em; height: .5em; border: 1.2px solid currentColor; border-radius: 2px; box-sizing: border-box; }
+.kfrac b { display: block; width: .85em; height: 2px; border-radius: 1px; background: currentColor; }
+.ckeys .key { height: 50px; }
+.ckeys .key.ansk { font: 600 15px/1 var(--sans); }
+.ckeys .key.x10k { font: 500 16px/1 var(--sans); }
+.varpanel { position: absolute; inset: 0; z-index: 3; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px; display: grid;
+  grid-template-columns: repeat(3, 1fr); gap: 5px; box-shadow: 0 6px 24px rgba(0,0,0,.18); }
+.varpanel[hidden] { display: none; }
+.varpanel .vp-head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; font: 600 12px/1 var(--sans); color: var(--muted); }
+.varpanel button.v { border: 1px solid var(--line); background: var(--key); color: var(--fg); border-radius: 8px; font: 500 13px/1.1 var(--mono); padding: 4px 6px; text-align: left; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.varpanel button.v b { font: italic 600 15px/1 var(--sans); margin-right: 6px; }
+.varpanel .vp-actions { grid-column: 1 / -1; display: flex; gap: 6px; }
+.varpanel .vp-actions button { flex: 1; }
+@media (max-height: 760px) { .key.f { height: 36px; padding-top: 8px; } .ckeys .key { height: 44px; } .nat-in { min-height: 52px; padding: 2px; } .nat { font-size: 24px; } .cres > .nat { font-size: 26px; } .cres { min-height: 40px; } .key .sl { top: 2px; } #cDisplay { gap: 3px; padding-block: 6px; } .cfoot { min-height: 28px; padding-top: 4px; } }
+@media (max-height: 680px) { .key.f { height: 34px; padding-top: 8px; font-size: 14px; } .key .sl { font-size: 8.5px; top: 2px; } .ckeys .key { height: 42px; } .nat-in { min-height: 50px; } .nat { font-size: 23px; } .cres > .nat { font-size: 27px; } .cres { min-height: 40px; } }
+@media (max-height: 600px) { .key.f { height: 30px; padding-top: 7px; font-size: 13px; } .ckeys .key { height: 36px; font-size: 18px; } .chist { min-height: 0; } .nat-in { min-height: 42px; } .nat { font-size: 20px; } .cres > .nat { font-size: 22px; } .cres { min-height: 32px; } .fkeys { gap: 4px; } .ckeys { gap: 4px; } .shell .app { gap: 5px; padding-block: 5px; } .modebar { padding-top: 5px; } .modetabs button { padding: 6px 11px; } .cfoot { min-height: 24px; } .ind-btn { padding: 3px 5px; } }
+@media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
 </style>
 
-<div class="app">
-  <header>
-    <h1>Prefix<b>Calc</b></h1>
-    <div class="hdr-btns">
-      <button class="chip" id="hapticBtn" aria-pressed="true" title="Vibrate on key press">Haptics</button>
-      <button class="chip" id="clearHist">Clear history</button>
+<div class="shell">
+  <nav class="modebar">
+    <div class="modetabs" role="tablist" aria-label="Mode" id="modeTabs"></div>
+    <span class="spacer"></span>
+    <button class="chip" id="hapticBtn" aria-pressed="true" title="Vibrate on key press">Haptics</button>
+    <button class="chip" id="clearHist">Clear</button>
+  </nav>
+
+<div class="app mode" id="mode-calc" data-mode="calc" hidden>
+  <div class="history chist" id="cHistory" aria-label="History"></div>
+  <section class="display" id="cDisplay">
+    <div class="nat nat-in" id="cExpr" aria-label="Expression" role="textbox" aria-readonly="true"></div>
+    <div class="cres" id="cRes" role="status" title="Tap to copy"></div>
+    <div class="cfoot">
+      <div class="ind">
+        <button class="ind-btn" id="angleBtn" title="Angle unit: tap to change">DEG</button>
+        <span class="flag" id="indS" hidden>SHIFT</span><span class="flag" id="indH" hidden>HYP</span><span class="flag" id="indSto" hidden>STO</span>
+      </div>
+      <div class="calt" id="cAlt"></div>
     </div>
-  </header>
+  </section>
+  <div class="fkeys" id="cFKeys"></div>
+  <div class="keys ckeys" id="cNKeys"></div>
+</div>
+
+<div class="app mode" id="mode-si" data-mode="si" hidden>
 
   <div class="history" id="history" aria-label="History"></div>
 
@@ -214,11 +324,10 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <button class="key eq" data-a="eq">=</button>
   </div>
 </div>
-<div class="sheet" id="tools" role="dialog" aria-modal="true" aria-labelledby="toolsTitle" hidden>
+<div class="mode tools-mode" id="mode-tools" data-mode="tools" hidden>
   <div class="sheet-inner">
     <div class="sheet-head">
-      <h2 id="toolsTitle" tabindex="-1">Tools</h2>
-      <button class="done" id="toolsDone">Done</button>
+      <h2 id="toolsTitle" class="sr-only" tabindex="-1">Tools</h2>
     </div>
     <div class="tabs" role="tablist" id="toolTabs">
       <button role="tab" data-tab="divider">Divider</button><button role="tab" data-tab="rc">RC / LC</button><button role="tab" data-tab="led">LED</button><button role="tab" data-tab="ohm">Ohm</button>
@@ -230,6 +339,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <section class="result" id="toolOut" aria-labelledby="alsoTitle" hidden></section>
   </div>
 </div>
+</div>
 <div class="toast" id="toast">Copied</div>
 
 <script>
@@ -237,6 +347,515 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 </script>
 <script>
 /*__TOOLS_JS__*/
+</script>
+<script>
+/*__NAT_JS__*/
+</script>
+<script>
+// ---------- shell: mode registry, shared settings, haptics, Ans ----------
+// A mode registers { id, title, el, show(), accept(number)?, clearHistory()? }. The shell adds its tab,
+// shows one mode at a time, and routes values between modes (Tools "Use" → the last calculator mode).
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem('prefixcalc:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set: function (k, v) { try { localStorage.setItem('prefixcalc:' + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  var haptic = store.get('haptic', true);
+  // Android/Chrome: Vibration API. iOS Safari has none, but since iOS 18 toggling an
+  // <input type="checkbox" switch> plays the system haptic tick, so we click a hidden one.
+  var hapticLabel = (function () {
+    if (navigator.vibrate) return null;
+    var label = document.createElement('label'), sw = document.createElement('input');
+    sw.type = 'checkbox'; sw.setAttribute('switch', ''); sw.tabIndex = -1;
+    label.setAttribute('aria-hidden', 'true'); label.style.display = 'none';
+    label.appendChild(sw); document.body.appendChild(label);
+    return label;
+  })();
+  var toastT;
+  var PC = window.PC = {
+    modes: {}, order: [], current: null, lastCalc: 'calc', store: store, ans: store.get('ans', null),
+    buzz: function () {
+      if (!haptic) return;
+      try { if (navigator.vibrate) navigator.vibrate(12); else if (hapticLabel) hapticLabel.click(); } catch (e) {}
+    },
+    toast: function (msg) {
+      var t = $('toast'); t.textContent = msg; t.classList.add('show');
+      clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 1300);
+    },
+    register: function (m) {
+      PC.modes[m.id] = m; PC.order.push(m.id);
+      var b = document.createElement('button');
+      b.setAttribute('role', 'tab'); b.textContent = m.title; b.dataset.mode = m.id;
+      b.addEventListener('click', function () { PC.buzz(); PC.show(m.id); });
+      $('modeTabs').appendChild(b); m.tab = b;
+    },
+    show: function (id) {
+      if (!PC.modes[id]) id = PC.order[0];
+      if (PC.current === id) return;
+      PC.order.forEach(function (k) { var m = PC.modes[k]; m.el.hidden = k !== id; m.tab.setAttribute('aria-selected', String(k === id)); });
+      PC.current = id;
+      if (PC.modes[id].accept) PC.lastCalc = id;
+      store.set('mode', id);
+      $('clearHist').hidden = !PC.modes[id].clearHistory;
+      if (PC.modes[id].show) PC.modes[id].show();
+    },
+    // a number from Tools goes back to the calculator mode the person came from
+    deliver: function (v) { PC.send(PC.lastCalc, v); },
+    send: function (id, v) { PC.show(id); PC.modes[id].accept(v); },
+    setAns: function (v) { PC.ans = NAT.freeze(typeof v === 'number' ? NAT.revive({ f: v }) : v); store.set('ans', PC.ans); },
+    start: function () { PC.show(store.get('mode', 'calc')); }
+  };
+  $('hapticBtn').setAttribute('aria-pressed', String(haptic));
+  $('hapticBtn').addEventListener('click', function () { haptic = !haptic; store.set('haptic', haptic); this.setAttribute('aria-pressed', String(haptic)); PC.buzz(); });
+  $('clearHist').addEventListener('click', function () { var m = PC.modes[PC.current]; if (m.clearHistory) { m.clearHistory(); PC.buzz(); } });
+})();
+</script>
+<script>
+// ---------- Calc mode: scientific calculator with natural display ----------
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var N = NAT, store = PC.store, sym = N.sym;
+  var exprEl = $('cExpr'), resEl = $('cRes'), altEl = $('cAlt'), histEl = $('cHistory');
+
+  var FIRST = [N.tpl('frac', [[sym('1')], [sym('3')]]), sym('+'), N.tpl('frac', [[sym('1')], [sym('6')]])];
+  var ed = new N.Editor(store.get('calc:expr', FIRST));
+  var st = {
+    angle: store.get('angle', 'deg'), shift: false, hyp: false, done: false, showDec: false, eng: null,
+    value: null, error: null, vars: store.get('vars', {}), history: store.get('calc:history', null), varMode: null
+  };
+  if (!st.history) {
+    // first launch: two examples that show what natural display does
+    st.history = [
+      { tree: [N.tpl('sqrt', [[sym('8')]])], v: N.freeze(N.evaluate([N.tpl('sqrt', [[sym('8')]])])) },
+      { tree: [N.fn('sin'), sym('3'), sym('0'), sym(')')], v: { n: '1', d: '2' } }
+    ];
+  }
+
+  // ---------- evaluation ----------
+  function env() { return { angle: st.angle, ans: PC.ans, vars: st.vars }; }
+  function compute() {
+    st.value = null; st.error = null;
+    if (ed.isEmpty()) return;
+    try { st.value = N.evaluate(ed.root, env()); }
+    catch (e) { st.error = e && e.code ? e : { code: 'syntax', message: 'Syntax error' }; }
+  }
+
+  // ---------- rendering of tree rows ----------
+  function h(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var RAD_SVG = '<svg viewBox="0 0 10 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0.5 17 L3 15.5 L6.2 29.5 L10 0"/></svg>';
+  var cursorKey = '';
+  function keyOf(path) { return JSON.stringify(path); }
+
+  function renderRow(row, path, live) {
+    var el = h('span', 'row'), here = live && keyOf(path) === cursorKey;
+    if (!row.length) {
+      var box = h('span', 'slot');
+      if (live) { box._slot = path; if (here) { box.classList.add('active'); box.appendChild(h('span', 'caret')); } }
+      el.appendChild(box);
+      return el;
+    }
+    for (var i = 0; i <= row.length; i++) {
+      if (here && ed.i === i) el.appendChild(h('span', 'caret'));
+      if (i === row.length) break;
+      var it = row[i];
+      if (it.t === 'pow' && (i === 0 || isOpBefore(row[i - 1]))) el.appendChild(h('span', 'slot ghost'));
+      var node = renderItem(it, path, i, live);
+      if (live) node._pos = { path: path, i: i };
+      el.appendChild(node);
+    }
+    return el;
+  }
+  function isOpBefore(it) { return it.t === 'f' || (it.t === 's' && /^([+−×÷(]|nCr|nPr)$/.test(it.v)); }
+  function sub(path, i, k) { return path.concat([[i, k]]); }
+
+  function renderItem(it, path, i, live) {
+    var e, v = it.v;
+    switch (it.t) {
+      case 's':
+        if (/^[0-9.]$/.test(v)) return h('span', 'd', v);
+        if (v === '(' || v === ')') return h('span', 'paren', v);
+        if (v === 'nCr' || v === 'nPr') return h('span', 'comb', v === 'nCr' ? 'C' : 'P');
+        if (v === 'Ans' || v === 'Ran#') return h('span', 'ans', v);
+        if (v === 'π' || v === 'e') return h('span', 'const', v);
+        if (/^[+−×÷]$/.test(v)) return h('span', 'op', v);
+        if (N.VARS.indexOf(v) >= 0) return h('span', 'var', v);
+        return h('span', 'sym', v);
+      case 'f':
+        e = h('span', 'fn'); e.appendChild(h('span', 'fname', N.fnLabel(v))); e.appendChild(h('span', 'paren', '('));
+        return e;
+      case 'frac':
+        e = h('span', 't-frac');
+        var num = h('span', 't-num'), den = h('span', 't-den');
+        num.appendChild(renderRow(it.a[0], sub(path, i, 0), live)); den.appendChild(renderRow(it.a[1], sub(path, i, 1), live));
+        e.appendChild(num); e.appendChild(den);
+        return e;
+      case 'pow':
+        e = h('span', 't-sup'); e.appendChild(renderRow(it.a[0], sub(path, i, 0), live));
+        return e;
+      case 'x10':
+        e = h('span', 't-x10'); e.appendChild(h('span', 'x10', '×10'));
+        var s = h('span', 't-sup'); s.appendChild(renderRow(it.a[0], sub(path, i, 0), live)); e.appendChild(s);
+        return e;
+      case 'sqrt':
+        return radical(renderRow(it.a[0], sub(path, i, 0), live));
+      case 'root':
+        e = h('span', 't-root');
+        var idx = h('span', 't-idx'); idx.appendChild(renderRow(it.a[0], sub(path, i, 0), live));
+        e.appendChild(idx); e.appendChild(radical(renderRow(it.a[1], sub(path, i, 1), live)));
+        return e;
+      case 'logb':
+        e = h('span', 't-logb'); e.appendChild(h('span', 'fname', 'log'));
+        var b = h('span', 't-sub'); b.appendChild(renderRow(it.a[0], sub(path, i, 0), live)); e.appendChild(b);
+        e.appendChild(h('span', 'paren', '(')); e.appendChild(renderRow(it.a[1], sub(path, i, 1), live)); e.appendChild(h('span', 'paren', ')'));
+        return e;
+      case 'abs':
+        e = h('span', 't-abs'); e.appendChild(h('span', 'bar'));
+        e.appendChild(renderRow(it.a[0], sub(path, i, 0), live)); e.appendChild(h('span', 'bar'));
+        return e;
+    }
+    return h('span', 'sym', '?');
+  }
+  function radical(body) {
+    var e = h('span', 't-sqrt'); e.innerHTML = RAD_SVG; e.appendChild(body);
+    return e;
+  }
+
+  // Parentheses and |bars| grow to the height of what they enclose.
+  function scaleParens(root) {
+    root.querySelectorAll('.row, .t-logb').forEach(function (row) {
+      var stack = [];
+      Array.prototype.forEach.call(row.children, function (kid) {
+        var p = kid.classList.contains('paren') ? kid : (kid.classList.contains('fn') ? kid.lastChild : null);
+        if (p && p.textContent === '(') { stack.push({ p: p, max: 0 }); return; }
+        if (p && p.textContent === ')') {
+          var top = stack.pop();
+          if (top) { grow([top.p, p], top.max); if (stack.length) stack[stack.length - 1].max = Math.max(stack[stack.length - 1].max, top.max); }
+          return;
+        }
+        if (kid.classList.contains('caret') || !stack.length) return;
+        stack[stack.length - 1].max = Math.max(stack[stack.length - 1].max, kid.getBoundingClientRect().height);
+      });
+      stack.forEach(function (s) { grow([s.p], s.max); });
+    });
+    root.querySelectorAll('.t-abs').forEach(function (a) {
+      var inner = a.children[1].getBoundingClientRect().height;
+      grow([a.children[0], a.children[2]], inner);
+    });
+  }
+  function grow(els, max) {
+    var base = els[0].getBoundingClientRect().height || 1;
+    if (max > base * 1.15) els.forEach(function (e) { e.style.transform = 'scaleY(' + (max / base).toFixed(3) + ')'; });
+  }
+
+  function mathEl(row, cls) { var w = h('span', 'nat' + (cls ? ' ' + cls : '')); w.appendChild(renderRow(row, [], false)); return w; }
+
+  // ---------- display ----------
+  function render() {
+    cursorKey = keyOf(ed.path);
+    compute();
+    $('cDisplay').classList.toggle('done-state', st.done);
+    exprEl.textContent = '';
+    exprEl.appendChild(renderRow(ed.root, [], true));
+    scaleParens(exprEl);
+    var caret = exprEl.querySelector('.caret');
+    if (caret) caret.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    $('indS').hidden = !st.shift; $('indH').hidden = !st.hyp;
+    $('angleBtn').textContent = st.angle.toUpperCase();
+    $('cFKeys').classList.toggle('shift-on', st.shift);
+    document.querySelectorAll('#cFKeys .key.shift').forEach(function (k) { k.setAttribute('aria-pressed', String(st.shift)); });
+    document.querySelectorAll('#cFKeys .key.hyp').forEach(function (k) { k.setAttribute('aria-pressed', String(st.hyp)); });
+    renderResult();
+    store.set('calc:expr', ed.root);
+  }
+
+  function renderResult() {
+    resEl.textContent = ''; altEl.textContent = '';
+    resEl.className = 'cres' + (st.done ? '' : ' live');
+    if (ed.isEmpty()) { resEl.classList.add('live'); resEl.appendChild(mathEl([sym('0')])); return; }
+    if (st.error) {
+      if (st.error.code === 'incomplete' && !st.done) { resEl.appendChild(mathEl([sym('…')])); return; }
+      resEl.classList.add('err'); resEl.appendChild(h('span', 'nat', st.error.message));
+      return;
+    }
+    var x = N.toNum(st.value), f = N.forms(st.value), row, badge = null;
+    if (st.eng != null) { var g = N.eng(x, st.eng); row = g.row; badge = g.prefix; }
+    else row = f.exact && !st.showDec ? f.exact : f.decimal;
+    var m = mathEl(row); resEl.appendChild(m); scaleParens(m);
+    if (badge) resEl.appendChild(h('span', 'pfx-badge', badge));
+    // second line: the other form, and the value in SI notation with a button to send it to the SI mode
+    if (f.exact && (st.showDec || st.eng != null)) altEl.appendChild(mathEl(f.exact));
+    else if (f.exact) altEl.appendChild(h('span', null, '≈ ' + N.rowToString(f.decimal).replace(/×10\^\(?(-?\d+)\)?/, 'e$1')));
+    var send = h('button', 'send');
+    var txt = SI.format(x, 4), mm = txt.match(/^(.*?)([pnµmkMGTf]?)$/);
+    send.appendChild(document.createTextNode('SI ' + mm[1]));
+    if (mm[2]) send.appendChild(h('span', 'pfx', mm[2]));
+    send.appendChild(document.createTextNode(' →'));
+    send.title = 'Send to the SI mode';
+    send.addEventListener('click', function (e) { e.stopPropagation(); PC.buzz(); PC.send('si', x); });
+    altEl.appendChild(send);
+  }
+
+  // ---------- history ----------
+  function renderHistory() {
+    histEl.textContent = '';
+    st.history.forEach(function (item) {
+      var row = h('div', 'h-item'); row.tabIndex = 0;
+      row.title = 'Tap to insert the result, hold to edit the expression';
+      var a = h('span', 'h-expr'), b = h('span', 'h-val');
+      a.appendChild(mathEl(item.tree));
+      var f = N.forms(N.revive(item.v));
+      b.appendChild(mathEl(f.exact || f.decimal));
+      row.appendChild(a); row.appendChild(b);
+      var timer = null, longFired = false;
+      row.addEventListener('pointerdown', function (ev) {
+        ev.preventDefault(); longFired = false;
+        timer = setTimeout(function () { longFired = true; PC.buzz(); ed.load(item.tree); st.done = false; render(); }, 500);
+      });
+      var cancel = function () { clearTimeout(timer); };
+      row.addEventListener('pointerleave', cancel); row.addEventListener('pointercancel', cancel);
+      row.addEventListener('pointerup', function () { cancel(); if (!longFired) { PC.buzz(); insertValue(N.revive(item.v)); } });
+      row.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { if (ev.shiftKey) { ed.load(item.tree); st.done = false; render(); } else insertValue(N.revive(item.v)); } });
+      histEl.appendChild(row);
+    });
+    histEl.querySelectorAll('.nat').forEach(scaleParens);
+    histEl.scrollTop = histEl.scrollHeight;
+  }
+
+  // Insert a value at the cursor in its exact form when it has one (fraction, surd), else as a decimal.
+  function insertValue(v) {
+    var f = N.forms(v);
+    if (st.done) { ed.clear(); st.done = false; }
+    var row = JSON.parse(JSON.stringify(f.exact || f.decimal));
+    var r = ed.row(), prev = r[ed.i - 1];
+    if (prev && (prev.t !== 's' || !/^([+−×÷(]|nCr|nPr)$/.test(prev.v)) && prev.t !== 'f') ed.insert('×');
+    if (prev && row[0] && row[0].t === 's' && row[0].v === '−') {
+      ed.insert('('); ed.insertItems(row); ed.insert(')');
+    } else ed.insertItems(row);
+    st.eng = null; st.showDec = false;
+    render();
+  }
+
+  function commit() {
+    compute();
+    if (!st.value) { st.done = true; render(); st.done = false; return; }
+    st.history.push({ tree: JSON.parse(JSON.stringify(ed.root)), v: N.freeze(st.value) });
+    if (st.history.length > 50) st.history = st.history.slice(-50);
+    store.set('calc:history', st.history);
+    PC.setAns(st.value);
+    st.done = true; st.showDec = false; st.eng = null;
+    renderHistory(); render();
+  }
+
+  // ---------- keys ----------
+  // a: action, l: label (HTML, constants only), s: SHIFT action, sl: SHIFT label, c: extra class
+  var BOX = '<span class="kbox"></span>';
+  var FKEYS = [
+    { a: 'shift', l: 'SHIFT', c: 'shift nav' }, { a: 'var', l: 'VAR', s: 'sto', sl: 'STO' },
+    { a: 'left', l: '◀', c: 'nav', aria: 'Cursor left' }, { a: 'right', l: '▶', c: 'nav', aria: 'Cursor right' },
+    { a: 'up', l: '▲', c: 'nav', aria: 'Cursor up' }, { a: 'down', l: '▼', c: 'nav', aria: 'Cursor down' },
+
+    { a: 'tpl:frac', l: '<span class="kfrac"><i></i><b></b><i></i></span>', s: 'tpl:root', sl: '<sup>x</sup>√' + BOX, aria: 'Fraction' },
+    { a: 'tpl:sqrt', l: '√' + BOX, s: 'tpl:cbrt', sl: '∛' + BOX, aria: 'Square root' },
+    { a: 'tpl:sq', l: 'x²', s: 'tpl:cube', sl: 'x³' },
+    { a: 'tpl:pow', l: 'x<sup>y</sup>', s: 'tpl:p10', sl: '10<sup>x</sup>', aria: 'Power' },
+    { a: 'fn:log', l: 'log', s: 'tpl:logb', sl: 'log<sub>a</sub>b' },
+    { a: 'fn:ln', l: 'ln', s: 'tpl:exp', sl: 'e<sup>x</sup>' },
+
+    { a: 'fn:sin', l: 'sin', s: 'fn:asin', sl: 'sin⁻¹' }, { a: 'fn:cos', l: 'cos', s: 'fn:acos', sl: 'cos⁻¹' },
+    { a: 'fn:tan', l: 'tan', s: 'fn:atan', sl: 'tan⁻¹' },
+    { a: 'sym:(', l: '(', s: 'tpl:abs', sl: 'Abs' }, { a: 'sym:)', l: ')' },
+    { a: 'tpl:inv', l: 'x⁻¹', s: 'sym:!', sl: 'x!' },
+
+    { a: 'hyp', l: 'hyp', c: 'hyp' }, { a: 'sym:π', l: 'π', s: 'sym:e', sl: 'e' },
+    { a: 'sym:nCr', l: 'nCr', s: 'sym:nPr', sl: 'nPr' }, { a: 'sym:%', l: '%', s: 'sym:Ran#', sl: 'Ran#' },
+    { a: 'sd', l: 'S⇔D', aria: 'Switch exact and decimal' }, { a: 'eng', l: 'ENG', s: 'engl', sl: '←ENG' }
+  ];
+  var NKEYS = [
+    { a: 'sym:7', l: '7' }, { a: 'sym:8', l: '8' }, { a: 'sym:9', l: '9' }, { a: 'bs', l: '⌫', c: 'fn', aria: 'Delete' }, { a: 'ac', l: 'AC', c: 'fn ac' },
+    { a: 'sym:4', l: '4' }, { a: 'sym:5', l: '5' }, { a: 'sym:6', l: '6' }, { a: 'sym:×', l: '×', c: 'op' }, { a: 'sym:÷', l: '÷', c: 'op' },
+    { a: 'sym:1', l: '1' }, { a: 'sym:2', l: '2' }, { a: 'sym:3', l: '3' }, { a: 'sym:+', l: '+', c: 'op' }, { a: 'sym:−', l: '−', c: 'op' },
+    { a: 'sym:0', l: '0' }, { a: 'sym:.', l: '.' }, { a: 'tpl:x10', l: '×10<sup>x</sup>', c: 'fn x10k', aria: 'Times ten to the power' },
+    { a: 'sym:Ans', l: 'Ans', c: 'fn ansk' }, { a: 'eq', l: '=', c: 'eq' }
+  ];
+  function buildKeys(box, defs, fkey) {
+    defs.forEach(function (d) {
+      var b = h('button', 'key' + (fkey ? ' f' : '') + (d.c ? ' ' + d.c : ''));
+      b.innerHTML = (d.sl ? '<span class="sl">' + d.sl + '</span>' : '') + '<span class="ml">' + d.l + '</span>';
+      if (d.aria) b.setAttribute('aria-label', d.aria);
+      b.dataset.a = d.a;
+      b.addEventListener('pointerdown', function (ev) { ev.preventDefault(); });
+      b.addEventListener('click', function () { PC.buzz(); press(d); });
+      box.appendChild(b);
+    });
+  }
+
+  var CONTINUE = /^(sym:([+−×÷!%]|nCr|nPr)|tpl:(pow|sq|cube|inv|frac))$/;
+  var BINARY = /^(sym:([+×÷!%]|nCr|nPr)|tpl:(pow|sq|cube|inv))$/;
+  var HYP = { sin: 'sinh', cos: 'cosh', tan: 'tanh', asin: 'asinh', acos: 'acosh', atan: 'atanh' };
+
+  function press(d) {
+    var a = st.shift && d.s ? d.s : d.a;
+    if (a !== 'shift') st.shift = false;
+    run(a);
+  }
+  function run(a) {
+    var parts = a.split(':'), kind = parts[0], arg = parts.slice(1).join(':');
+    switch (a) {
+      case 'shift': st.shift = !st.shift; render(); return;
+      case 'hyp': st.hyp = !st.hyp; render(); return;
+      case 'left': st.done = false; ed.left(); render(); return;
+      case 'right': st.done = false; ed.right(); render(); return;
+      case 'up': st.done = false; ed.vertical(-1); render(); return;
+      case 'down': st.done = false; ed.vertical(1); render(); return;
+      case 'ac': ed.clear(); st.done = false; st.eng = null; st.showDec = false; render(); return;
+      case 'bs': if (st.done) { st.done = false; ed.toEnd(); } ed.backspace(); render(); return;
+      case 'eq': commit(); return;
+      case 'sd': if (st.value) { st.showDec = !st.showDec; st.eng = null; render(); } return;
+      case 'eng': if (st.value) { st.eng = st.eng == null ? 0 : st.eng + 1; render(); } return;
+      case 'engl': if (st.value) { st.eng = st.eng == null ? 0 : st.eng - 1; render(); } return;
+      case 'var': openVars(null); return;
+      case 'sto': openVars('sto'); return;
+    }
+    // input keys: after "=" an operator continues from Ans, anything else starts a new line
+    if (st.done) {
+      ed.clear();
+      if (CONTINUE.test(a)) ed.insert('Ans');
+      st.done = false;
+    } else if (ed.isEmpty() && BINARY.test(a) && PC.ans) ed.insert('Ans');
+    st.eng = null; st.showDec = false;
+    if (kind === 'sym') ed.insert(arg);
+    else if (kind === 'fn') { var name = st.hyp && HYP[arg] ? HYP[arg] : arg; st.hyp = false; ed.insertFunc(name); }
+    else if (kind === 'tpl') insertTemplate(arg);
+    render();
+  }
+  function insertTemplate(t) {
+    var r = ed.row(), prev = r[ed.i - 1];
+    switch (t) {
+      case 'sq': ed.insertTemplate('pow', [[sym('2')]]); return;
+      case 'cube': ed.insertTemplate('pow', [[sym('3')]]); return;
+      case 'inv': ed.insertTemplate('pow', [[sym('−'), sym('1')]]); return;
+      case 'cbrt': ed.insertTemplate('root', [[sym('3')]]); return;
+      case 'p10':
+        if (prev && prev.t === 's' && /^[0-9.]$/.test(prev.v)) ed.insert('×');
+        ed.insert('1'); ed.insert('0'); ed.insertTemplate('pow'); return;
+      case 'exp': ed.insert('e'); ed.insertTemplate('pow'); return;
+      default: ed.insertTemplate(t);
+    }
+  }
+
+  // ---------- variables panel (VAR inserts, STO stores the result, M+ / M−) ----------
+  var panel = null;
+  function shortVal(o) { if (!o) return '0'; var v = N.revive(o), f = N.forms(v); return N.rowToString(f.exact || f.decimal); }
+  function openVars(mode) {
+    closeVars();
+    st.varMode = mode;
+    $('indSto').hidden = mode !== 'sto';
+    panel = h('div', 'varpanel'); panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', mode === 'sto' ? 'Store result in' : 'Variables');
+    var head = h('div', 'vp-head');
+    head.appendChild(h('span', null, mode === 'sto' ? 'Store the result in…' : 'Tap to insert'));
+    var close = h('button', 'chip', 'Close'); close.addEventListener('click', function () { PC.buzz(); closeVars(); });
+    head.appendChild(close); panel.appendChild(head);
+    N.VARS.forEach(function (name) {
+      var b = h('button', 'v'); b.appendChild(h('b', null, name)); b.appendChild(document.createTextNode(shortVal(st.vars[name])));
+      b.addEventListener('click', function () {
+        PC.buzz();
+        if (st.varMode === 'sto') store1(name, currentValue(), 'set');
+        else { closeVars(); run('sym:' + name); }
+      });
+      panel.appendChild(b);
+    });
+    var acts = h('div', 'vp-actions');
+    [['M+', 'add'], ['M−', 'sub'], ['Clear all', 'clear']].forEach(function (x) {
+      var b = h('button', 'chip', x[0]);
+      b.addEventListener('click', function () {
+        PC.buzz();
+        if (x[1] === 'clear') { st.vars = {}; store.set('vars', st.vars); openVars(st.varMode); return; }
+        store1('M', currentValue(), x[1]);
+      });
+      acts.appendChild(b);
+    });
+    panel.appendChild(acts);
+    $('cFKeys').appendChild(panel);
+  }
+  function closeVars() { if (panel) panel.remove(); panel = null; st.varMode = null; $('indSto').hidden = true; }
+  function currentValue() { compute(); return st.value || (PC.ans ? N.revive(PC.ans) : null); }
+  function store1(name, v, how) {
+    if (!v) { PC.toast('Nothing to store yet'); return; }
+    var old = st.vars[name] ? N.revive(st.vars[name]) : N.revive({ n: '0', d: '1' });
+    var nv = how === 'add' ? N.add(old, v) : how === 'sub' ? N.sub(old, v) : v;
+    st.vars[name] = N.freeze(nv); store.set('vars', st.vars);
+    closeVars();
+    PC.toast(name + ' = ' + shortVal(st.vars[name]));
+  }
+
+  // ---------- pointer: tap places the cursor, swipe moves it ----------
+  (function () {
+    var x0 = null, moved = 0, swiped = false;
+    exprEl.addEventListener('pointerdown', function (e) { x0 = e.clientX; moved = 0; swiped = false; });
+    exprEl.addEventListener('pointermove', function (e) {
+      if (x0 == null || e.pointerType === 'mouse') return;
+      var steps = Math.trunc((e.clientX - x0) / 18);
+      while (moved < steps) { ed.right(); moved++; swiped = true; }
+      while (moved > steps) { ed.left(); moved--; swiped = true; }
+      if (swiped) { st.done = false; PC.buzz(); render(); }
+    });
+    exprEl.addEventListener('pointerup', function (e) {
+      var was = x0; x0 = null;
+      if (was == null || swiped) return;
+      var t = e.target;
+      while (t && t !== exprEl && !t._pos && !t._slot) t = t.parentNode;
+      st.done = false;
+      if (!t || t === exprEl) { ed.toEnd(); if (ed.root.length && e.clientX < exprEl.getBoundingClientRect().left + 40) ed.setCursor([], 0); }
+      else if (t._slot) ed.setCursor(t._slot, 0);
+      else { var r = t.getBoundingClientRect(); ed.setCursor(t._pos.path, t._pos.i + (e.clientX > r.left + r.width / 2 ? 1 : 0)); }
+      render();
+    });
+    exprEl.addEventListener('pointercancel', function () { x0 = null; });
+  })();
+
+  // tap the result to copy it (full precision decimal)
+  resEl.addEventListener('click', function () {
+    if (!st.value) return;
+    var x = N.toNum(st.value), text = String(Number(x.toPrecision(15)));
+    var done = function () { PC.toast('Copied: ' + text); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { PC.toast('Copy failed'); });
+    else PC.toast('Copy failed');
+  });
+  $('angleBtn').addEventListener('click', function () {
+    st.angle = { deg: 'rad', rad: 'gra', gra: 'deg' }[st.angle]; store.set('angle', st.angle); PC.buzz(); render();
+  });
+
+  // hardware keyboard
+  var KB = { '*': 'sym:×', 'x': 'sym:×', '/': 'tpl:frac', '-': 'sym:−', '+': 'sym:+', '^': 'tpl:pow', '(': 'sym:(', ')': 'sym:)', '!': 'sym:!', '%': 'sym:%', '.': 'sym:.', ',': 'sym:.' };
+  document.addEventListener('keydown', function (ev) {
+    if (PC.current !== 'calc' || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    var k = ev.key, a = null;
+    if (/^[0-9]$/.test(k)) a = 'sym:' + k;
+    else if (KB[k]) a = KB[k];
+    else if (k === 'Enter' || k === '=') a = 'eq';
+    else if (k === 'Backspace') a = 'bs';
+    else if (k === 'Escape') a = panel ? null : 'ac';
+    else if (k === 'ArrowLeft') a = 'left'; else if (k === 'ArrowRight') a = 'right';
+    else if (k === 'ArrowUp') a = 'up'; else if (k === 'ArrowDown') a = 'down';
+    if (k === 'Escape' && panel) { ev.preventDefault(); closeVars(); return; }
+    if (!a) return;
+    ev.preventDefault(); run(a);
+  });
+
+  buildKeys($('cFKeys'), FKEYS, true);
+  buildKeys($('cNKeys'), NKEYS, false);
+  renderHistory();
+
+  PC.register({
+    id: 'calc', title: 'Calc', el: $('mode-calc'),
+    show: function () { render(); renderHistory(); },
+    accept: function (v) { insertValue(typeof v === 'number' ? N.revive({ f: v }) : v); },
+    clearHistory: function () { st.history = []; store.set('calc:history', []); renderHistory(); }
+  });
+})();
 </script>
 <script>
 (function () {
@@ -250,24 +869,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   var state = { value: null, shift: 0, series: store.get('series', 'E24'), haptic: store.get('haptic', true), history: store.get('history', []) };
   var SIG = 4;
 
-  // ---------- haptics (Android vibrates; iOS Safari has no web vibration API) ----------
-  // Android/Chrome: Vibration API. iOS Safari has none, but since iOS 18 toggling an
-  // <input type="checkbox" switch> plays the system haptic tick, so we click a hidden one.
-  var hapticLabel = (function () {
-    if (navigator.vibrate) return null;
-    var label = document.createElement('label'), sw = document.createElement('input');
-    sw.type = 'checkbox'; sw.setAttribute('switch', ''); sw.tabIndex = -1;
-    label.setAttribute('aria-hidden', 'true'); label.style.display = 'none';
-    label.appendChild(sw); document.body.appendChild(label);
-    return label;
-  })();
-  function buzz() {
-    if (!state.haptic) return;
-    try {
-      if (navigator.vibrate) navigator.vibrate(12);
-      else if (hapticLabel) hapticLabel.click();
-    } catch (e) {}
-  }
+  function buzz() { PC.buzz(); }
 
   // ---------- editing at the caret ----------
   function sel() { return { s: input.selectionStart == null ? input.value.length : input.selectionStart, e: input.selectionEnd == null ? input.value.length : input.selectionEnd }; }
@@ -333,6 +935,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     if (state.value == null) return;
     var expr = input.value.trim(), v = state.value;
     state.history.push({ expr: expr, value: v });
+    PC.setAns(v);
     if (state.history.length > 50) state.history = state.history.slice(-50);
     store.set('history', state.history);
     renderHistory();
@@ -380,7 +983,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   // ---------- keypad ----------
   var actions = {
     ac: function () { input.value = ''; changed(); },
-    tools: function () { openTools(); },
+    tools: function () { PC.show('tools'); },
     bs: backspace, left: function () { move(-1); }, right: function () { move(1); }, eq: commit,
     inv: function () {
       var r = sel(), v = input.value;
@@ -389,7 +992,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
       else insert('1/(');
     }
   };
-  document.querySelectorAll('.key').forEach(function (k) {
+  document.querySelectorAll('#mode-si .key').forEach(function (k) {
     k.addEventListener('pointerdown', function (ev) { ev.preventDefault(); }); // keep focus & caret in the input
     k.addEventListener('click', function () {
       buzz();
@@ -407,7 +1010,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     else if (ev.key === '|' ) { ev.preventDefault(); insert('||'); }
   });
   document.addEventListener('keydown', function (ev) {
-    if (!$('tools').hidden) { if (ev.key === 'Escape') { ev.preventDefault(); closeTools(); } return; }
+    if (PC.current !== 'si') return;
     if (document.activeElement === input || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     if (ev.key.length === 1) { ev.preventDefault(); input.focus(); insert(ev.key === '|' ? '||' : ev.key); }
     else if (ev.key === 'Backspace') { ev.preventDefault(); input.focus(); backspace(); }
@@ -450,9 +1053,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     b.addEventListener('click', function () { state.series = b.dataset.s; store.set('series', state.series); paintSeries(); buzz(); render(); });
   });
 
-  $('hapticBtn').addEventListener('click', function () { state.haptic = !state.haptic; store.set('haptic', state.haptic); this.setAttribute('aria-pressed', String(state.haptic)); buzz(); });
-  $('hapticBtn').setAttribute('aria-pressed', String(state.haptic));
-  $('clearHist').addEventListener('click', function () { state.history = []; store.set('history', []); renderHistory(); });
+
 
   // initial state: the example from the idea, so the first screen shows what the app does
   if (store.get('history', null) === null) state.history = [{ expr: '4k7 + 330', value: 5030 }, { expr: '1/(2π × 10k × 10n)', value: 1 / (2 * Math.PI * 1e4 * 1e-8) }];
@@ -584,7 +1185,7 @@ header h1 b { color: var(--prefix); font-weight: 600; }
       inp.classList.toggle('missing', empty && !solved);
       inp.placeholder = solved ? '= ' + fmtValue(res[k], f[2]) : (empty ? 'to calculate' : '');
       var use = $(id + '-use'); use.hidden = !solved;
-      use.onclick = solved ? (function (val) { return function () { buzz(); closeTools(); insert(reusable(val)); }; })(res[k]) : null;
+      use.onclick = solved ? (function (val) { return function () { buzz(); PC.deliver(val); }; })(res[k]) : null;
       $(id).nextSibling.hidden = empty;  // clear button only on filled fields
       var note = $(id + '-note'), text = res && res.note && res.note[k];
       note.textContent = text || ''; note.hidden = !text;
@@ -619,25 +1220,25 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     row.appendChild(val);
     var use = document.createElement('button'); use.className = 'use'; use.textContent = 'Use';
     use.setAttribute('aria-label', 'Use ' + label + ' in the calculator');
-    use.addEventListener('click', function () { buzz(); closeTools(); insert(reusable(value)); });
+    use.addEventListener('click', function () { buzz(); PC.deliver(value); });
     row.appendChild(use);
     return row;
   }
-  function openTools() {
-    $('tools').hidden = false; document.body.style.overflow = 'hidden';
-    renderToolFields(); $('toolsTitle').focus({ preventScroll: true });
-  }
-  function closeTools() {
-    $('tools').hidden = true; document.body.style.overflow = '';
-    input.focus({ preventScroll: true });
-  }
-  $('toolsDone').addEventListener('click', function () { buzz(); closeTools(); });
+
   document.querySelectorAll('#toolTabs button').forEach(function (b) {
     b.addEventListener('click', function () { tool = b.dataset.tab; store.set('tool', tool); buzz(); renderToolFields(); });
   });
 
   paintSeries(); renderHistory(); render();
   setCaret(input.value.length);
-  input.focus({ preventScroll: true });
+
+  PC.register({
+    id: 'si', title: 'SI', el: $('mode-si'),
+    show: function () { render(); input.focus({ preventScroll: true }); },
+    accept: function (v) { insert(reusable(v)); },
+    clearHistory: function () { state.history = []; store.set('history', []); renderHistory(); }
+  });
+  PC.register({ id: 'tools', title: 'Tools', el: $('mode-tools'), show: function () { renderToolFields(); } });
 })();
 </script>
+<script>PC.start();</script>
