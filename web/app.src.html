@@ -238,6 +238,55 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 @media (max-height: 680px) { .key.f { height: 34px; padding-top: 8px; font-size: 14px; } .key .sl { font-size: 8.5px; top: 2px; } .ckeys .key { height: 42px; } .nat-in { min-height: 50px; } .nat { font-size: 23px; } .cres > .nat { font-size: 27px; } .cres { min-height: 40px; } }
 @media (max-height: 600px) { .key.f { height: 30px; padding-top: 7px; font-size: 13px; } .ckeys .key { height: 36px; font-size: 18px; } .chist { min-height: 0; } .nat-in { min-height: 42px; } .nat { font-size: 20px; } .cres > .nat { font-size: 22px; } .cres { min-height: 32px; } .fkeys { gap: 4px; } .ckeys { gap: 4px; } .shell .app { gap: 5px; padding-block: 5px; } .modebar { padding-top: 5px; } .modetabs button { padding: 6px 11px; } .cfoot { min-height: 24px; } .ind-btn { padding: 3px 5px; } }
 @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+/* ---------- Units mode ---------- */
+.u-sub { display: grid; grid-template-columns: repeat(3, 1fr); }
+.u-panel[hidden] { display: none; }
+.u-panel { display: flex; flex-direction: column; gap: 12px; }
+.u-search { width: 100%; box-sizing: border-box; font: 400 15px/1.2 var(--sans); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; outline: none; }
+.u-search:focus { border-color: var(--eq); }
+.u-qs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin: 0 -2px; }
+.u-qs::-webkit-scrollbar { display: none; }
+.u-qs button { flex: none; }
+.u-favs:empty { display: none; }
+.u-favs { display: flex; gap: 6px; flex-wrap: wrap; }
+.u-favs button { font: 500 12px/1 var(--mono); }
+.u-in { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; align-items: stretch; }
+.u-in input { min-width: 0; box-sizing: border-box; font: 400 22px/1.2 var(--mono); color: var(--fg); background: var(--panel); border: 1px solid var(--muted); border-radius: 10px; padding: 9px 10px; outline: none; -webkit-user-select: text; user-select: text; }
+.u-in input:focus { border-color: var(--eq); box-shadow: 0 0 0 2px var(--res-line); }
+.u-in input[aria-invalid="true"] { border-color: var(--err); }
+.u-sel { font: 500 15px/1 var(--mono); color: var(--fg); background: var(--key-fn); border: 1px solid var(--line); border-radius: 10px; padding: 0 8px; max-width: 150px; }
+.u-sel[hidden] { display: none; }
+.u-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.u-bar .spacer { flex: 1; }
+.u-best { display: flex; align-items: center; gap: 10px; background: var(--res-bg); border: 1px solid var(--res-line); border-radius: 14px; padding: 10px 12px; }
+.u-best[hidden] { display: none; }
+.u-best .lbl { font: 600 10px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--eq); }
+.u-best .val { font: 600 clamp(18px, 6vw, 24px)/1.2 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+.u-best .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.u-best .u-note { font: 400 13px/1.2 var(--mono); color: var(--muted); }
+.u-icon { flex: none; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--res-line); background: transparent; color: var(--eq); font: 500 17px/1 var(--sans); cursor: pointer; }
+.u-icon[aria-pressed="true"] { background: var(--eq); color: var(--eq-fg); }
+.u-group { margin: 6px 0 0; }
+.u-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-top: 1px solid var(--line); cursor: pointer; border-radius: 0; }
+.u-row:active { background: var(--key-fn); }
+.u-row.src { background: var(--prefix-bg); border-radius: 8px; }
+.u-row .u-sym { flex: none; min-width: 64px; font: 600 14px/1.2 var(--mono); }
+.u-row .u-sym .pfx { color: var(--prefix); }
+.u-row .u-name { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.u-row .u-val { text-align: right; font: 400 17px/1.2 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.u-row .u-val small { display: block; font-size: 12px; color: var(--muted); }
+.u-row .tag { font: 600 9px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--eq); margin-left: 6px; }
+.u-row .cp { flex: none; width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: 400 15px/1 var(--sans); cursor: pointer; }
+.u-row .cp:hover { background: var(--key-fn); }
+.u-out { display: flex; flex-direction: column; }
+.u-kv { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--res-line); font-size: 14px; }
+.u-kv:first-child { border-top: 0; }
+.u-kv b { font: 600 15px/1.3 var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.u-warn { color: var(--err); font-size: 13px; line-height: 1.4; margin: 6px 0 0; }
+.u-note2 { color: var(--muted); font-size: 12px; line-height: 1.4; margin: 0; }
+.fields select { width: 100%; box-sizing: border-box; font: 400 16px/1.2 var(--mono); color: var(--fg); background: var(--panel); border: 1px solid var(--muted); border-radius: 10px; padding: 10px; }
+.seg[hidden] { display: none; }
+#uStatus:empty { min-height: 0; margin-top: -14px; }
 </style>
 
 <div class="shell">
@@ -339,6 +388,51 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     <section class="result" id="toolOut" aria-labelledby="alsoTitle" hidden></section>
   </div>
 </div>
+<div class="mode tools-mode" id="mode-units" data-mode="units" hidden>
+  <div class="sheet-inner">
+    <h2 class="sr-only">Units</h2>
+    <div class="tabs u-sub" role="tablist" id="uTabs">
+      <button role="tab" data-tab="convert">Convert</button><button role="tab" data-tab="db">Decibels</button><button role="tab" data-tab="wire">Wire &amp; trace</button>
+    </div>
+    <section class="u-panel" id="uConvert">
+      <input class="u-search" id="uSearch" type="search" placeholder="Find a quantity or unit (psi, torque…)" aria-label="Find a quantity or unit" autocomplete="off">
+      <div class="u-qs" id="uQs" role="group" aria-label="Quantity"></div>
+      <div class="u-favs" id="uFavs" role="group" aria-label="Starred pairs"></div>
+      <div class="u-in">
+        <input id="uVal" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Value" aria-describedby="uStatus">
+        <select class="u-sel" id="uPfx" aria-label="Prefix"></select>
+        <select class="u-sel" id="uUnit" aria-label="Unit"></select>
+      </div>
+      <p class="tool-status" id="uStatus" aria-live="polite"></p>
+      <div class="u-best" id="uBest" aria-live="polite">
+        <div class="grow"><span class="lbl" id="uBestLbl">Imperial</span><span class="val" id="uBestVal"></span><span class="u-note" id="uBestNote"></span></div>
+        <button class="u-icon" id="uSwap" title="Swap: make this the input" aria-label="Swap units">⇅</button>
+        <button class="u-icon" id="uStar" title="Star this pair" aria-label="Star this pair" aria-pressed="false">☆</button>
+      </div>
+      <div class="u-bar">
+        <div class="seg" id="uSys" role="group" aria-label="Show units"><button data-v="both">Both</button><button data-v="metric">Metric</button><button data-v="imperial">Imperial</button></div>
+        <span class="spacer"></span>
+        <div class="seg" id="uSig" role="group" aria-label="Significant digits"><button data-v="4">4</button><button data-v="6">6</button><button data-v="8">8</button></div>
+        <div class="seg" id="uDen" role="group" aria-label="Inch fractions"><button data-v="16">1/16</button><button data-v="32">1/32</button><button data-v="64">1/64</button></div>
+      </div>
+      <div id="uList"></div>
+    </section>
+    <section class="u-panel" id="uDb" hidden>
+      <div class="modes" id="uDbModes" role="group" aria-label="What to convert"><button data-m="ratio">dB ↔ ratio</button><button data-m="level">dBm ↔ W ↔ V</button><button data-m="sum">Add levels</button></div>
+      <p class="tool-hint" id="uDbHint"></p>
+      <div class="fields" id="uDbFields"></div>
+      <p class="tool-status" id="uDbStatus" aria-live="polite"></p>
+      <section class="result" id="uDbOut" hidden></section>
+    </section>
+    <section class="u-panel" id="uWire" hidden>
+      <div class="modes" id="uWireModes" role="group" aria-label="What to size"><button data-m="trace">PCB trace</button><button data-m="awg">Wire gauge</button><button data-m="drop">Voltage drop</button></div>
+      <p class="tool-hint" id="uWireHint"></p>
+      <div class="fields" id="uWireFields"></div>
+      <p class="tool-status" id="uWireStatus" aria-live="polite"></p>
+      <section class="result" id="uWireOut" hidden></section>
+    </section>
+  </div>
+</div>
 </div>
 <div class="toast" id="toast">Copied</div>
 
@@ -350,6 +444,9 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 </script>
 <script>
 /*__NAT_JS__*/
+</script>
+<script>
+/*__UNITS_JS__*/
 </script>
 <script>
 // ---------- shell: mode registry, shared settings, haptics, Ans ----------
@@ -1239,6 +1336,331 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     clearHistory: function () { state.history = []; store.set('history', []); renderHistory(); }
   });
   PC.register({ id: 'tools', title: 'Tools', el: $('mode-tools'), show: function () { renderToolFields(); } });
+})();
+</script>
+<script>
+// ---------- Units mode: unit conversion (metric ↔ imperial), decibels, wire & trace sizing ----------
+(function () {
+  'use strict';
+  var U = window.UNITS, $ = function (id) { return document.getElementById(id); };
+  var store = PC.store, buzz = PC.buzz;
+  var def = { tab: 'convert', q: 'pressure', u: 'bar', e3: 0, text: '1', sys: 'both', sig: 6, den: 32, favs: [], pref: {},
+    db: { m: 'ratio', src: {}, text: {} }, wire: { m: 'trace', src: {}, text: {} } };
+  var st = store.get('units', {});
+  for (var k in def) if (!st.hasOwnProperty(k)) st[k] = def[k];
+  try { U.unit(st.q, st.u); } catch (e) { st.q = def.q; st.u = def.u; st.e3 = 0; }
+  function save() { store.set('units', st); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function symHtml(x, e3) { var p = U.PREFIX_SYM[e3] || ''; return (p ? '<span class="pfx">' + p + '</span>' : '') + esc(x.sym); }
+  function num(v) { return U.format(v, st.sig); }
+  function setSeg(id, v) { document.querySelectorAll('#' + id + ' button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === String(v))); }); }
+  function copy(text) {
+    try { navigator.clipboard.writeText(text).then(function () { PC.toast('Copied ' + text); }, function () { PC.toast('Copy failed'); }); } catch (e) { PC.toast('Copy failed'); }
+  }
+
+  // ---------- tabs ----------
+  function showTab(t) {
+    st.tab = t; save();
+    document.querySelectorAll('#uTabs button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === t)); });
+    $('uConvert').hidden = t !== 'convert'; $('uDb').hidden = t !== 'db'; $('uWire').hidden = t !== 'wire';
+    if (t === 'convert') renderConvert(); else if (t === 'db') dbForm.render(); else wireForm.render();
+  }
+  document.querySelectorAll('#uTabs button').forEach(function (b) { b.addEventListener('click', function () { buzz(); showTab(b.dataset.tab); }); });
+
+  // ---------- Convert ----------
+  function other(sys) { return sys === 'metric' ? 'imperial' : 'metric'; }
+  function renderQs() {
+    var f = $('uSearch').value.trim().toLowerCase(), box = $('uQs'), html = '';
+    U.QUANTITIES.forEach(function (q) {
+      var hit = !f || q.name.toLowerCase().indexOf(f) >= 0 || q.units.some(function (x) { return x.sym.toLowerCase().indexOf(f) >= 0 || x.name.toLowerCase().indexOf(f) >= 0; });
+      if (hit) html += '<button class="chip" data-q="' + q.id + '" aria-pressed="' + (q.id === st.q) + '">' + esc(q.name) + '</button>';
+    });
+    box.innerHTML = html || '<span class="u-note2">No quantity or unit matches “' + esc($('uSearch').value.trim()) + '”.</span>';
+    var on = box.querySelector('[aria-pressed="true"]'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+  function renderFavs() {
+    $('uFavs').innerHTML = st.favs.map(function (f, i) {
+      try { var q = U.quantity(f.q); return '<button class="chip" data-fav="' + i + '" title="' + esc(q.name) + '">★ ' + esc(U.unit(q, f.u).sym) + ' → ' + esc(U.unit(q, f.to).sym) + '</button>'; } catch (e) { return ''; }
+    }).join('');
+  }
+  function renderSelects() {
+    var q = U.quantity(st.q), x = U.unit(q, st.u);
+    $('uUnit').innerHTML = ['metric', 'imperial'].map(function (s) {
+      return '<optgroup label="' + (s === 'metric' ? 'Metric' : 'Imperial') + '">' + q.units.filter(function (y) { return y.sys === s; }).map(function (y) {
+        return '<option value="' + esc(y.id) + '"' + (y.id === st.u ? ' selected' : '') + ' title="' + esc(y.name) + '">' + esc(y.sym) + '</option>';
+      }).join('') + '</optgroup>';
+    }).join('');
+    var ps = U.prefixesFor(x);
+    $('uPfx').hidden = ps.length < 2;
+    if (ps.indexOf(st.e3) < 0) st.e3 = 0;
+    $('uPfx').innerHTML = ps.map(function (e) { return '<option value="' + e + '"' + (e === st.e3 ? ' selected' : '') + '>' + (e ? U.PREFIX_SYM[e] : '×1') + '</option>'; }).join('');
+  }
+  function lengthNote(r, b) {
+    if (r.unit.id === 'in' && st.q === 'length') { var f = U.inchFraction(U.fromBase(r.unit, b, 0), st.den); return f.text + (Math.abs(f.error) > 1e-9 ? ' (' + (f.error > 0 ? '+' : '−') + Math.abs(f.error).toFixed(4) + '")' : ''); }
+    if (r.unit.id === 'ft' && st.q === 'length') return U.feetInches(b, st.den).text;
+    return '';
+  }
+  var last = null;
+  function compute() {
+    var q = U.quantity(st.q), x = U.unit(q, st.u), list = $('uList'), status = $('uStatus');
+    last = null; status.className = 'tool-status'; $('uVal').removeAttribute('aria-invalid');
+    if (!st.text.trim()) { status.textContent = 'Enter a value to convert.'; list.innerHTML = ''; $('uBest').hidden = true; return; }
+    var v, rows, best, b;
+    try {
+      v = U.parseInput(st.text, q.id, x.id);
+      b = U.toBase(q, x, v, st.e3);
+      rows = U.results(q.id, v, x.id, st.e3, { system: st.sys });
+      best = U.bestOther(q.id, v, x.id, st.e3, st.pref[q.id + ':' + other(x.sys)]);
+    } catch (e) {
+      status.textContent = e.message; status.className = 'tool-status err'; $('uVal').setAttribute('aria-invalid', 'true');
+      list.innerHTML = ''; $('uBest').hidden = true; return;
+    }
+    status.textContent = '';
+    last = { q: q, x: x, v: v, b: b, best: best, rows: rows };
+    $('uBest').hidden = false;
+    $('uBestLbl').textContent = (best.unit.sys === 'metric' ? 'Metric' : 'Imperial') + ' · best fit';
+    $('uBestVal').innerHTML = esc(num(best.value)) + ' ' + symHtml(best.unit, best.e3);
+    $('uBestNote').textContent = lengthNote(best, b);
+    var key = q.id + '|' + x.id + '|' + best.unit.id, starred = st.favs.some(function (f) { return f.q + '|' + f.u + '|' + f.to === key; });
+    $('uStar').setAttribute('aria-pressed', String(starred)); $('uStar').textContent = starred ? '★' : '☆';
+    var html = '';
+    ['metric', 'imperial'].forEach(function (s) {
+      var rs = rows.filter(function (r) { return r.unit.sys === s; });
+      if (!rs.length) return;
+      html += '<p class="step u-group">' + (s === 'metric' ? 'Metric' : 'Imperial') + '</p>';
+      rs.forEach(function (r) {
+        var i = rows.indexOf(r), note = lengthNote(r, b);
+        html += '<div class="u-row' + (r.unit.id === x.id ? ' src' : '') + '" data-i="' + i + '" role="button" tabindex="0" aria-label="Use ' + esc(r.unit.name) + ' as input">' +
+          '<span class="u-sym">' + symHtml(r.unit, r.e3) + (r.unit === best.unit ? '<span class="tag">best</span>' : '') + '</span>' +
+          '<span class="u-name">' + esc(r.unit.name) + '</span>' +
+          '<span class="u-val">' + esc(num(r.value)) + (note ? '<small>' + esc(note) + '</small>' : '') + '</span>' +
+          '<button class="cp" data-cp="' + i + '" aria-label="Copy ' + esc(r.unit.name) + ' value" title="Copy">⧉</button></div>';
+      });
+    });
+    list.innerHTML = html;
+  }
+  function useRow(r) {
+    buzz();
+    st.u = r.unit.id; st.e3 = r.e3; st.text = U.format(r.value, 10);
+    $('uVal').value = st.text; save(); renderSelects(); compute();
+  }
+  function renderConvert() {
+    setSeg('uSys', st.sys); setSeg('uSig', st.sig); setSeg('uDen', st.den);
+    $('uDen').hidden = st.q !== 'length';
+    if (document.activeElement !== $('uVal')) $('uVal').value = st.text;
+    renderQs(); renderFavs(); renderSelects(); compute();
+  }
+  function pickQuantity(id, unitId) {
+    var q = U.quantity(id);
+    st.q = id; st.u = unitId || q.units[0].id; st.e3 = unitId ? 0 : (q.units[0].base || 0);
+    save(); renderConvert();
+  }
+  $('uQs').addEventListener('click', function (e) { var b = e.target.closest('[data-q]'); if (b) { buzz(); pickQuantity(b.dataset.q); } });
+  $('uFavs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-fav]'); if (!b) return;
+    var f = st.favs[+b.dataset.fav]; buzz();
+    st.pref[f.q + ':' + U.unit(f.q, f.to).sys] = f.to; pickQuantity(f.q, f.u);
+  });
+  $('uSearch').addEventListener('input', function () {
+    var s = this.value.trim(), hit = null;
+    if (s) U.QUANTITIES.forEach(function (q) { q.units.forEach(function (x) { if (!hit && x.sym === s) hit = [q.id, x.id]; }); });
+    if (s && !hit) U.QUANTITIES.forEach(function (q) { q.units.forEach(function (x) { if (!hit && x.sym.toLowerCase() === s.toLowerCase()) hit = [q.id, x.id]; }); });
+    if (hit && (hit[0] !== st.q || hit[1] !== st.u)) { st.q = hit[0]; st.u = hit[1]; st.e3 = 0; save(); renderSelects(); compute(); $('uDen').hidden = st.q !== 'length'; }
+    renderQs();
+  });
+  $('uVal').addEventListener('input', function () { st.text = this.value; save(); compute(); });
+  $('uUnit').addEventListener('change', function () {
+    var x = U.unit(st.q, this.value); st.u = x.id; st.e3 = x.base && U.prefixesFor(x).indexOf(x.base) >= 0 ? x.base : 0;
+    save(); renderSelects(); compute();
+  });
+  $('uPfx').addEventListener('change', function () { st.e3 = +this.value; save(); compute(); });
+  $('uList').addEventListener('click', function (e) {
+    var c = e.target.closest('[data-cp]');
+    if (c && last) { var r = last.rows[+c.dataset.cp]; buzz(); copy(num(r.value) + ' ' + U.symbol(r.unit, r.e3)); return; }
+    var row = e.target.closest('.u-row'); if (row && last) useRow(last.rows[+row.dataset.i]);
+  });
+  $('uList').addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('u-row') && last) { e.preventDefault(); useRow(last.rows[+e.target.dataset.i]); }
+  });
+  $('uSwap').addEventListener('click', function () {
+    if (!last) return;
+    st.pref[last.q.id + ':' + last.x.sys] = last.x.id;
+    useRow(last.best);
+  });
+  $('uStar').addEventListener('click', function () {
+    if (!last) return; buzz();
+    var key = last.q.id + '|' + last.x.id + '|' + last.best.unit.id, i = -1;
+    st.favs.forEach(function (f, j) { if (f.q + '|' + f.u + '|' + f.to === key) i = j; });
+    if (i >= 0) { st.favs.splice(i, 1); PC.toast('Removed from starred'); }
+    else { st.favs.push({ q: last.q.id, u: last.x.id, to: last.best.unit.id }); st.pref[last.q.id + ':' + last.best.unit.sys] = last.best.unit.id; PC.toast('Starred'); }
+    save(); renderFavs(); compute();
+  });
+  [['uSys', 'sys', false], ['uSig', 'sig', true], ['uDen', 'den', true]].forEach(function (s) {
+    $(s[0]).addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return; buzz();
+      st[s[1]] = s[2] ? +b.dataset.v : b.dataset.v; save(); setSeg(s[0], st[s[1]]); compute();
+    });
+  });
+
+  // ---------- small field forms (Decibels, Wire & trace) ----------
+  // A mode lists fields; fields marked solve form a group where the one the person typed in is the source and
+  // the others are calculated in place (shown dashed, as in Tools).
+  function parseNum(s) { var v = SI.evaluate(s); return v; }
+  function makeForm(cfg) {
+    var S = st[cfg.key];
+    function mode() { return cfg.modes[S.m]; }
+    function render() {
+      document.querySelectorAll('#' + cfg.modesEl + ' button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.m === S.m)); });
+      var m = mode(), T = S.text[S.m] || (S.text[S.m] = {});
+      $(cfg.hintEl).textContent = m.hint;
+      $(cfg.fieldsEl).innerHTML = m.fields.map(function (f) {
+        var id = cfg.key + '-' + f.id, lab = '<label for="' + id + '">' + esc(f.label) + (f.unit ? ' <span class="unit">' + esc(f.unit) + '</span>' : '') + (f.opt ? ' <span class="opt">optional</span>' : '') + '</label>';
+        var ctl = f.opts ? '<select id="' + id + '" data-f="' + f.id + '">' + f.opts.map(function (o) { return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>'; }).join('') + '</select>'
+          : '<input id="' + id + '" data-f="' + f.id + '" inputmode="text" autocomplete="off" spellcheck="false" placeholder="' + esc(f.ph || '') + '">';
+        return '<div class="field">' + lab + ctl + '</div>';
+      }).join('');
+      m.fields.forEach(function (f) {
+        var el = $(cfg.key + '-' + f.id), v = T[f.id] !== undefined ? T[f.id] : (f.def !== undefined ? f.def : '');
+        if (f.opts) el.value = v || f.opts[0][0]; else el.value = v;
+      });
+      run();
+    }
+    function run() {
+      var m = mode(), T = S.text[S.m], vals = {}, bad = null, src = S.src[S.m] || m.defSrc;
+      m.fields.forEach(function (f) {
+        var el = $(cfg.key + '-' + f.id); el.removeAttribute('aria-invalid'); el.classList.remove('computed');
+        if (f.solve && f.id !== src) return;
+        var s = el.value.trim();
+        if (f.opts) { vals[f.id] = el.value; return; }
+        if (!s) { vals[f.id] = null; return; }
+        try { vals[f.id] = parseNum(s); } catch (e) { if (!bad) bad = [f, e.message]; el.setAttribute('aria-invalid', 'true'); }
+      });
+      var status = $(cfg.statusEl), out = $(cfg.outEl);
+      status.className = 'tool-status';
+      var r = null;
+      if (bad) { status.textContent = bad[0].label + ': ' + bad[1]; status.className = 'tool-status err'; }
+      else {
+        try { r = m.solve(vals, src); status.textContent = ''; }
+        catch (e) { status.textContent = e.message; status.className = 'tool-status err'; var se = $(cfg.key + '-' + src); if (se && se.tagName === 'INPUT') se.setAttribute('aria-invalid', 'true'); }
+      }
+      m.fields.forEach(function (f) {
+        if (!f.solve || f.id === src) return;
+        var el = $(cfg.key + '-' + f.id);
+        if (document.activeElement === el) return;
+        el.value = r && r.set && r.set[f.id] !== undefined ? r.set[f.id] : '';
+        if (!f.opts) el.classList.add('computed');
+      });
+      if (r && r.out && r.out.length) {
+        out.hidden = false;
+        out.innerHTML = '<p class="step">Result</p><div class="u-out">' + r.out.map(function (kv) { return '<div class="u-kv"><span>' + esc(kv[0]) + '</span><b>' + esc(kv[1]) + '</b></div>'; }).join('') + '</div>' +
+          (r.warn || []).map(function (w) { return '<p class="u-warn">' + esc(w) + '</p>'; }).join('') + (r.note ? '<p class="u-note2" style="margin:6px 0">' + esc(r.note) + '</p>' : '');
+      } else out.hidden = true;
+    }
+    $(cfg.fieldsEl).addEventListener('input', function (e) {
+      var id = e.target.dataset.f; if (!id || e.target.tagName === 'SELECT') return;
+      var m = mode(), f = m.fields.filter(function (x) { return x.id === id; })[0];
+      S.text[S.m][id] = e.target.value;
+      if (f.solve) { S.src[S.m] = id; m.fields.forEach(function (o) { if (o.solve && o.id !== id) delete S.text[S.m][o.id]; }); }
+      save(); run();
+    });
+    $(cfg.fieldsEl).addEventListener('change', function (e) {
+      if (e.target.tagName !== 'SELECT') return;
+      var id = e.target.dataset.f, m = mode(), f = m.fields.filter(function (x) { return x.id === id; })[0];
+      S.text[S.m][id] = e.target.value;
+      if (f.solve) { S.src[S.m] = id; m.fields.forEach(function (o) { if (o.solve && o.id !== id) delete S.text[S.m][o.id]; }); }
+      save(); run();
+    });
+    document.querySelectorAll('#' + cfg.modesEl + ' button').forEach(function (b) {
+      b.addEventListener('click', function () { buzz(); S.m = b.dataset.m; save(); render(); });
+    });
+    return { render: render };
+  }
+  function need(v, msg) { if (v === null || v === undefined) throw new U.UnitError(msg); return v; }
+  var fdb = function (x) { return String(Number(x.toFixed(4))); };
+  var fsi = function (x) { return SI.format(x, 5); };
+  var fn = function (x) { return U.format(x, 6); };
+  var D = U.DB;
+
+  var dbForm = makeForm({ key: 'db', modesEl: 'uDbModes', hintEl: 'uDbHint', fieldsEl: 'uDbFields', statusEl: 'uDbStatus', outEl: 'uDbOut', modes: {
+    ratio: { hint: 'Type in any field. Power: dB = 10·log(P₂/P₁). Voltage or current: dB = 20·log(V₂/V₁).', defSrc: 'db',
+      fields: [{ id: 'db', label: 'Gain', unit: 'dB', solve: true, def: '3' }, { id: 'pr', label: 'Power ratio', unit: '×', solve: true }, { id: 'vr', label: 'Voltage ratio', unit: '×', solve: true }],
+      solve: function (v, src) {
+        var x = need(v[src], 'Enter a value');
+        var db = src === 'db' ? x : src === 'pr' ? D.fromPowerRatio(x) : D.fromVoltageRatio(x);
+        return { set: { db: fdb(db), pr: fn(D.toPowerRatio(db)), vr: fn(D.toVoltageRatio(db)) } };
+      } },
+    level: { hint: 'Type in any level. Power ↔ voltage uses the load impedance (50 Ω RF, 75 Ω video, 600 Ω audio). Prefixes work: 10m = 10 mW.', defSrc: 'dbm',
+      fields: [{ id: 'r', label: 'Load', unit: 'Ω', def: '50' }, { id: 'dbm', label: 'Power', unit: 'dBm', solve: true, def: '0' }, { id: 'dbw', label: 'Power', unit: 'dBW', solve: true },
+        { id: 'w', label: 'Power', unit: 'W', solve: true }, { id: 'vrms', label: 'Voltage', unit: 'V rms', solve: true }, { id: 'dbv', label: 'Voltage', unit: 'dBV', solve: true },
+        { id: 'dbu', label: 'Voltage', unit: 'dBu', solve: true }, { id: 'dbuv', label: 'Voltage', unit: 'dBµV', solve: true }],
+      solve: function (v, src) {
+        var x = need(v[src], 'Enter a value'), R = need(v.r, 'Enter the load impedance');
+        var w = { dbm: function () { return D.dBmToW(x); }, dbw: function () { return D.dBWToW(x); }, w: function () { return x; },
+          vrms: function () { return D.vrmsToW(x, R); }, dbv: function () { return D.vrmsToW(D.dBVToV(x), R); },
+          dbu: function () { return D.vrmsToW(D.dBuToV(x), R); }, dbuv: function () { return D.vrmsToW(D.dBuVToV(x), R); } }[src]();
+        var vr = D.wToVrms(w, R);
+        return { set: { dbm: fdb(D.wToDBm(w)), dbw: fdb(D.wToDBW(w)), w: fsi(w), vrms: fsi(vr), dbv: fdb(D.vToDBV(vr)), dbu: fdb(D.vToDBu(vr)), dbuv: fdb(D.vToDBuV(vr)) },
+          out: [['Peak voltage (sine)', fsi(D.peak(vr)) + 'V'], ['Peak-to-peak', fsi(D.peakToPeak(vr)) + 'V'], ['Current', fsi(vr / R) + 'A']] };
+      } },
+    sum: { hint: 'Adds uncorrelated powers: 0 dBm + 0 dBm = 3.01 dBm. Fill in two or more levels.', defSrc: null,
+      fields: [{ id: 'a', label: 'Level 1', unit: 'dBm', def: '0' }, { id: 'b', label: 'Level 2', unit: 'dBm', def: '0' }, { id: 'c', label: 'Level 3', unit: 'dBm', opt: true }, { id: 'd', label: 'Level 4', unit: 'dBm', opt: true }],
+      solve: function (v) {
+        var ls = ['a', 'b', 'c', 'd'].map(function (k) { return v[k]; }).filter(function (x) { return x !== null && x !== undefined; });
+        if (ls.length < 2) throw new U.UnitError('Fill in at least two levels');
+        var t = D.powerSum(ls);
+        return { out: [['Total', fdb(t) + ' dBm'], ['Total power', fsi(D.dBmToW(t)) + 'W']] };
+      } }
+  } });
+
+  var awgOpts = []; for (var n = -3; n <= 40; n++) awgOpts.push([String(n), 'AWG ' + U.awgLabel(n)]);
+  var ozOpts = [['1', '1 oz (35 µm)'], ['0.5', '½ oz (18 µm)'], ['2', '2 oz (70 µm)'], ['3', '3 oz (105 µm)']];
+  var wireForm = makeForm({ key: 'wire', modesEl: 'uWireModes', hintEl: 'uWireHint', fieldsEl: 'uWireFields', statusEl: 'uWireStatus', outEl: 'uWireOut', modes: {
+    trace: { hint: 'IPC-2221. Enter the current to get the minimum width, or a width to get the maximum current.', defSrc: 'i',
+      fields: [{ id: 'i', label: 'Current', unit: 'A', solve: true, def: '1' }, { id: 'w', label: 'Width', unit: 'mm', solve: true },
+        { id: 'dt', label: 'Temperature rise', unit: '°C', def: '10' }, { id: 'oz', label: 'Copper', opts: ozOpts },
+        { id: 'layer', label: 'Layer', opts: [['external', 'External'], ['internal', 'Internal']] }, { id: 'len', label: 'Length', unit: 'mm', opt: true }],
+      solve: function (v, src) {
+        var o = { dT: need(v.dt, 'Enter the temperature rise'), oz: +v.oz, layer: v.layer }, set = {}, x = need(v[src], 'Enter a value');
+        if (src === 'w') { o.current = U.traceCurrent({ widthMm: x, dT: o.dT, oz: o.oz, layer: o.layer }).current; set.i = SI.format(o.current, 4); }
+        else o.current = x;
+        if (v.len) o.length = v.len / 1000;
+        var r = U.traceWidth(o);
+        if (src !== 'w') set.w = U.format(r.widthMm, 4);
+        var out = [['Minimum width', U.format(r.widthMm, 4) + ' mm  ·  ' + U.format(r.widthMil, 4) + ' mil'], ['Cross-section', U.format(r.areaMil2, 4) + ' mil²  ·  ' + U.format(r.areaMm2, 4) + ' mm²']];
+        if (src === 'w') out.unshift(['Maximum current', SI.format(o.current, 4) + 'A']);
+        if (r.resistance !== undefined) out.push(['Resistance (at 25 °C + rise)', fsi(r.resistance) + 'Ω'], ['Voltage drop', fsi(r.voltageDrop) + 'V'], ['Power loss', fsi(r.powerLoss) + 'W']);
+        return { set: set, out: out, warn: r.warnings, note: 'IPC-2221 is conservative; IPC-2152 usually allows narrower traces.' };
+      } },
+    awg: { hint: 'Pick a gauge, or type a cross-section or diameter to find the nearest gauge.', defSrc: 'g',
+      fields: [{ id: 'g', label: 'Gauge', opts: awgOpts, solve: true, def: '24' }, { id: 'a', label: 'Cross-section', unit: 'mm²', solve: true }, { id: 'd', label: 'Diameter', unit: 'mm', solve: true }],
+      solve: function (v, src) {
+        var w, extra = [];
+        if (src === 'g') w = U.awg(+v.g);
+        else {
+          var f = src === 'a' ? U.fromArea(need(v.a, 'Enter a cross-section')) : U.fromDiameter(need(v.d, 'Enter a diameter'));
+          w = f.nearest;
+          extra = [['Nearest AWG', 'AWG ' + w.label], ['Smallest AWG at least this big', f.atLeast ? 'AWG ' + f.atLeast.label : 'larger than 4/0'],
+            ['Nearest IEC size', f.iecNearest + ' mm²'], ['IEC size at least this big', f.iecAtLeast ? f.iecAtLeast + ' mm²' : 'larger than 120 mm²']];
+        }
+        var set = { g: String(w.n) };
+        if (src !== 'a') set.a = U.format(w.areaMm2, 4);
+        if (src !== 'd') set.d = U.format(w.diameterMm, 4);
+        return { set: set, out: extra.concat([['AWG ' + w.label + ' diameter', U.format(w.diameterMm, 4) + ' mm  ·  ' + U.format(w.diameterMil, 4) + ' mil'],
+          ['Area', U.format(w.areaMm2, 4) + ' mm²  ·  ' + U.format(w.kcmil, 4) + ' kcmil'], ['Copper resistance (20 °C)', U.format(w.ohmPerKm, 4) + ' Ω/km  ·  ' + U.format(w.ohmPer1000ft, 4) + ' Ω/kft']]),
+          note: 'Ampacity is not shown: it depends on insulation, bundling and the standard. Check the voltage drop instead.' };
+      } },
+    drop: { hint: 'Copper wire, round trip (out and back) at 20 °C.', defSrc: null,
+      fields: [{ id: 'a', label: 'Cross-section', unit: 'mm²', def: '1.5' }, { id: 'len', label: 'Length, one way', unit: 'm', def: '10' }, { id: 'i', label: 'Current', unit: 'A', def: '5' }, { id: 'v', label: 'Supply', unit: 'V', opt: true, def: '12' }],
+      solve: function (v) {
+        var r = U.voltageDrop({ areaMm2: need(v.a, 'Enter a cross-section'), length: need(v.len, 'Enter the length'), current: need(v.i, 'Enter the current'), supply: v.v || 0 });
+        var out = [['Wire resistance', fsi(r.resistance) + 'Ω'], ['Voltage drop', fsi(r.drop) + 'V']];
+        if (r.percent !== null) out.push(['Drop of supply', r.percent.toFixed(2) + ' %']);
+        out.push(['Power lost in wire', fsi(r.drop * v.i) + 'W']);
+        return { out: out };
+      } }
+  } });
+
+  PC.register({ id: 'units', title: 'Units', el: $('mode-units'), show: function () { showTab(st.tab); } });
 })();
 </script>
 <script>PC.start();</script>
