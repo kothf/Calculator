@@ -44,24 +44,16 @@ const head = `<!doctype html>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-title" content="PrefixCalc">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<style>html,body{height:100%;margin:0;overflow:hidden}body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);font-size:14px}.shell{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html.standalone .shell{padding-top:calc(env(safe-area-inset-top,0px) + 12px);padding-bottom:6px}html.standalone .chist{min-height:0}html.standalone .key.f{height:38px}html.standalone .ckeys .key{height:48px}html{background:#eef0f2}@media (prefers-color-scheme:dark){html{background:#000}}[hidden]{display:none!important}</style>
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<style>html,body{height:100%;margin:0;overflow:hidden}body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);font-size:14px}.shell{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html.standalone .shell{padding-top:max(6px,env(safe-area-inset-top,0px))}html.standalone .chist{min-height:0}html.standalone .key.f{height:38px}html.standalone .ckeys .key{height:48px}html{background:#eef0f2}@media (prefers-color-scheme:dark){html{background:#000}}[hidden]{display:none!important}</style>
 <script>
-// iOS home-screen apps can report a viewport shorter than the screen (the status bar height is lost at the
-// bottom). The app is one fixed screen, so size it to the full screen when it runs standalone.
+// Home-screen app: the status bar is opaque ("black"), so iOS gives the page the whole area under it.
+// (With "black-translucent" iOS 26 drew the page under the status bar, blurred that strip, and cut
+// the page off one status-bar height above the bottom of the screen.)
 (function () {
   var standalone = navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
-  // iOS 26 blurs the strip under the status bar of a home-screen app; .standalone moves the mode bar below it
   if (standalone) document.documentElement.classList.add('standalone');
-  function fit() {
-    var h = window.innerHeight;
-    if (standalone) {
-      var portrait = window.innerWidth < window.innerHeight;
-      var sh = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-      if (sh > h) h = sh;
-    }
-    document.documentElement.style.setProperty('--app-h', h + 'px');
-  }
+  function fit() { document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px'); }
   fit();
   addEventListener('resize', fit);
   addEventListener('orientationchange', function () { setTimeout(fit, 300); });
