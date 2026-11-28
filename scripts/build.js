@@ -45,7 +45,7 @@ const head = `<!doctype html>
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-title" content="PrefixCalc">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<style>html,body{height:100%;margin:0;overflow:hidden}body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);font-size:14px}.shell{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html.standalone .shell{padding-top:max(6px,env(safe-area-inset-top,0px))}html.standalone .chist{min-height:0}html.standalone .key.f{height:38px}html.standalone .ckeys .key{height:48px}html{background:#eef0f2}@media (prefers-color-scheme:dark){html{background:#000}}[hidden]{display:none!important}</style>
+<style>html,body{height:100%;margin:0;overflow:hidden}body{position:fixed;top:0;left:0;right:0;height:var(--app-h,100%);font-size:14px}.shell{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html.standalone .shell{padding-top:max(6px,env(safe-area-inset-top,0px))}html{background:#eef0f2}@media (prefers-color-scheme:dark){html{background:#000}}[hidden]{display:none!important}</style>
 <script>
 // Home-screen app: the status bar is opaque ("black"), so iOS gives the page the whole area under it.
 // (With "black-translucent" iOS 26 drew the page under the status bar, blurred that strip, and cut
