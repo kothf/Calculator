@@ -80,7 +80,7 @@ const tail = `
   var held = false;
   btn.addEventListener('pointerdown', function () { held = false; t = setTimeout(function () { held = true; show(); }, 1500); });
   // a long press must not also toggle haptics
-  btn.addEventListener('click', function (e) { if (held) { held = false; e.stopImmediatePropagation(); } }, true);
+  document.addEventListener('click', function (e) { if (held && e.target === btn) { held = false; e.stopPropagation(); } }, true);
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (e) { btn.addEventListener(e, function () { clearTimeout(t); }); });
   function frame(css, color) {
     var d = document.createElement('div');
