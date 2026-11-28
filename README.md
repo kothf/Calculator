@@ -74,6 +74,10 @@ After the first launch the app works without internet.
 | `web/icons/` | App icon (SVG and PNG 180/192/512). |
 | `scripts/build.js` | PWA build. |
 
+## Units mode
+
+Converts 20 engineering quantities between metric and imperial (inch-pound) units with SI prefixes, plus decibels (dB, dBm, dBV, dBu, dBµV) and conductor sizing (PCB trace width by IPC-2221, AWG wire gauge, voltage drop). Core logic: `src/units.js`, tests: `test/units.test.js`.
+
 ## Adding a mode
 
 Every mode registers itself with the shell in `web/app.src.html`:

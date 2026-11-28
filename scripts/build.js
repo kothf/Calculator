@@ -1,4 +1,4 @@
-// Builds two outputs from web/app.src.html + src/si.js + src/tools.js:
+// Builds two outputs from web/app.src.html + src/si.js + src/tools.js + src/natural.js + src/units.js:
 //   dist/app.html  – page fragment (no <html>/<head>), used for the claude.ai artifact preview
 //   dist/pwa/      – standalone installable PWA (index.html + manifest + service worker + icon), works offline
 const fs = require('fs');
@@ -8,7 +8,8 @@ const src = fs.readFileSync(path.join(root, 'web/app.src.html'), 'utf8');
 const core = fs.readFileSync(path.join(root, 'src/si.js'), 'utf8');
 const tools = fs.readFileSync(path.join(root, 'src/tools.js'), 'utf8');
 const nat = fs.readFileSync(path.join(root, 'src/natural.js'), 'utf8');
-const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools).replace('/*__NAT_JS__*/', () => nat);
+const units = fs.readFileSync(path.join(root, 'src/units.js'), 'utf8');
+const fragment = src.replace('/*__SI_JS__*/', () => core).replace('/*__TOOLS_JS__*/', () => tools).replace('/*__NAT_JS__*/', () => nat).replace('/*__UNITS_JS__*/', () => units);
 const dist = path.join(root, 'dist');
 const pwa = path.join(dist, 'pwa');
 fs.mkdirSync(pwa, { recursive: true });

@@ -6,6 +6,7 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.svg': 'image/s
 const srv = http.createServer((q, r) => { let f = path.join(root, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html';
   fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'content-type': types[path.extname(f)] || 'text/plain' }); r.end(d); } }); });
 const calcChecks = require('./e2e-calc.js');
+const unitsChecks = require('./e2e-units.js');
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ? 'PASS ' : 'FAIL ') + m); };
 (async () => {
   await new Promise(r => srv.listen(8765, r));
@@ -151,6 +152,8 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   // layout: no horizontal overflow, keypad fits
   const ov = await p.evaluate(() => document.documentElement.scrollWidth > innerWidth); ok(!ov, 'no horizontal overflow');
   const eqBox = await p.locator('#mode-si .key.eq').boundingBox(); ok(eqBox.y + eqBox.height <= p.viewportSize().height, '= key visible without scroll');
+  await unitsChecks(p, ok);
+  await p.click('#modeTabs button[data-mode="si"]');
   // offline via service worker
   await p.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, { timeout: 5000 }).catch(() => {});
   await ctx.setOffline(true); await p.reload(); await p.waitForTimeout(300);
@@ -161,7 +164,11 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); console.log((c ?
   const eq2 = await sm.locator('#mode-calc .key.eq').boundingBox(); ok(!(await sm.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'iPhone SE: no overflow');
   ok(eq2.y + eq2.height <= 568, 'iPhone SE: Calc = key fits ' + (eq2.y + eq2.height));
   await sm.click('#modeTabs button[data-mode="si"]'); const eq3 = await sm.locator('#mode-si .key.eq').boundingBox();
-  ok(eq3.y + eq3.height <= 568, 'iPhone SE: SI = key fits ' + (eq3.y + eq3.height)); await sm.screenshot({ path: require('path').join(require('os').tmpdir(), 'prefixcalc-se.png') });
+  ok(eq3.y + eq3.height <= 568, 'iPhone SE: SI = key fits ' + (eq3.y + eq3.height));
+  await sm.click('#modeTabs button[data-mode="units"]'); ok(!(await sm.evaluate(() => document.documentElement.scrollWidth > innerWidth)), 'iPhone SE: Units no overflow');
+  const tabs = await sm.locator('.modebar').boundingBox(); ok(tabs.width <= 320, 'iPhone SE: mode bar fits');
+  await sm.screenshot({ path: require('path').join(require('os').tmpdir(), 'prefixcalc-se-units.png') });
+  await sm.click('#modeTabs button[data-mode="si"]'); await sm.screenshot({ path: require('path').join(require('os').tmpdir(), 'prefixcalc-se.png') });
   await b.close(); srv.close();
   console.log(fails.length ? `\n${fails.length} FAILED` : '\nALL PASSED');
 })();
