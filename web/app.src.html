@@ -70,7 +70,8 @@ header h1 b { color: var(--prefix); font-weight: 600; }
 
 .keys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .prefixes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-.key { height: 52px; border: 0; border-radius: 12px; background: var(--key); color: var(--fg); font: 500 21px/1 var(--mono);
+.hsw { display: none; }
+.key { display: flex; align-items: center; justify-content: center; box-sizing: border-box; text-align: center; -webkit-user-select: none; user-select: none; height: 52px; border: 0; border-radius: 12px; background: var(--key); color: var(--fg); font: 500 21px/1 var(--mono);
   cursor: pointer; touch-action: manipulation; box-shadow: 0 1px 0 var(--line); }
 .key:active, .key.down { filter: brightness(.88); transform: translateY(1px); }
 .key.fn { background: var(--key-fn); font-size: 17px; }
@@ -460,22 +461,39 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     set: function (k, v) { try { localStorage.setItem('prefixcalc:' + k, JSON.stringify(v)); } catch (e) {} }
   };
   var haptic = store.get('haptic', true);
-  // Android/Chrome: Vibration API. iOS Safari has none, but since iOS 18 toggling an
-  // <input type="checkbox" switch> plays the system haptic tick, so we click a hidden one.
-  var hapticLabel = (function () {
-    if (navigator.vibrate) return null;
-    var label = document.createElement('label'), sw = document.createElement('input');
-    sw.type = 'checkbox'; sw.setAttribute('switch', ''); sw.tabIndex = -1;
-    label.setAttribute('aria-hidden', 'true'); label.style.display = 'none';
-    label.appendChild(sw); document.body.appendChild(label);
-    return label;
-  })();
+  // Android/Chrome: Vibration API. iOS has none, and since iOS 26 a switch clicked from code no longer ticks:
+  // only a real finger tap on an <input type="checkbox" switch> does. So every key is a <label> that wraps a
+  // hidden switch; the tap on the key toggles the switch and iOS plays its haptic.
+  function tactile(el) {
+    if (el._tactile) return el;
+    el._tactile = true;
+    var sw = document.createElement('input');
+    sw.type = 'checkbox'; sw.setAttribute('switch', ''); sw.className = 'hsw'; sw.tabIndex = -1; sw.setAttribute('aria-hidden', 'true');
+    sw.disabled = !haptic || !!navigator.vibrate;
+    el.appendChild(sw);
+    el.setAttribute('role', 'button');
+    if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); el.click(); } });
+    return el;
+  }
+  // a <button class="key"> in the static markup becomes a <label class="key"> before any script binds it
+  function toLabel(btn) {
+    var l = document.createElement('label');
+    Array.prototype.forEach.call(btn.attributes, function (a) { l.setAttribute(a.name, a.value); });
+    while (btn.firstChild) l.appendChild(btn.firstChild);
+    btn.parentNode.replaceChild(l, btn);
+    return tactile(l);
+  }
+  document.querySelectorAll('button.key').forEach(toLabel);
+  // the label forwards a second click to its switch; keep that one away from the key's own handlers
+  document.addEventListener('click', function (e) { if (e.target.classList && e.target.classList.contains('hsw')) e.stopPropagation(); }, true);
   var toastT;
   var PC = window.PC = {
+    tactile: tactile,
     modes: {}, order: [], current: null, lastCalc: 'calc', store: store, ans: store.get('ans', null),
     buzz: function () {
       if (!haptic) return;
-      try { if (navigator.vibrate) navigator.vibrate(12); else if (hapticLabel) hapticLabel.click(); } catch (e) {}
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {} // iOS: the key's own switch ticks
     },
     toast: function (msg) {
       var t = $('toast'); t.textContent = msg; t.classList.add('show');
@@ -505,7 +523,8 @@ header h1 b { color: var(--prefix); font-weight: 600; }
     start: function () { PC.show(store.get('mode', 'calc')); }
   };
   $('hapticBtn').setAttribute('aria-pressed', String(haptic));
-  $('hapticBtn').addEventListener('click', function () { haptic = !haptic; store.set('haptic', haptic); this.setAttribute('aria-pressed', String(haptic)); PC.buzz(); });
+  $('hapticBtn').addEventListener('click', function () { haptic = !haptic; store.set('haptic', haptic);
+    document.querySelectorAll('.hsw').forEach(function (sw) { sw.disabled = !haptic || !!navigator.vibrate; }); this.setAttribute('aria-pressed', String(haptic)); PC.buzz(); });
   $('clearHist').addEventListener('click', function () { var m = PC.modes[PC.current]; if (m.clearHistory) { m.clearHistory(); PC.buzz(); } });
 })();
 </script>
@@ -779,10 +798,11 @@ header h1 b { color: var(--prefix); font-weight: 600; }
   ];
   function buildKeys(box, defs, fkey) {
     defs.forEach(function (d) {
-      var b = h('button', 'key' + (fkey ? ' f' : '') + (d.c ? ' ' + d.c : ''));
+      var b = h('label', 'key' + (fkey ? ' f' : '') + (d.c ? ' ' + d.c : ''));
       b.innerHTML = (d.sl ? '<span class="sl">' + d.sl + '</span>' : '') + '<span class="ml">' + d.l + '</span>';
       if (d.aria) b.setAttribute('aria-label', d.aria);
       b.dataset.a = d.a;
+      PC.tactile(b);
       b.addEventListener('pointerdown', function (ev) { ev.preventDefault(); });
       b.addEventListener('click', function () { PC.buzz(); press(d); });
       box.appendChild(b);
