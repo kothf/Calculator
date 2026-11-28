@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Haptics test</title>
+<style>
+  body { font: 16px/1.4 system-ui, -apple-system, sans-serif; margin: 0; padding: max(16px, env(safe-area-inset-top)) 16px 32px; background: #111; color: #eee; }
+  h1 { font-size: 20px; margin: 8px 0; }
+  p { color: #aaa; font-size: 14px; margin: 6px 0 14px; }
+  button.t { display: block; width: 100%; margin: 10px 0; padding: 16px; font: 600 17px/1.2 system-ui; border: 0; border-radius: 12px; background: #2a5bd7; color: #fff; text-align: left; }
+  button.t small { display: block; font-weight: 400; font-size: 13px; opacity: .8; margin-top: 4px; }
+  .real { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; background: #222; margin: 10px 0; }
+  #ua { font-size: 12px; color: #888; word-break: break-all; }
+  .probe { position: fixed; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
+</style>
+</head>
+<body>
+<h1>Haptics test</h1>
+<p>Tap each button and note the numbers you feel. Settings → Sounds &amp; Haptics → System Haptics must be on, and Low Power Mode off.</p>
+<div class="real"><input type="checkbox" switch id="realSw"><label for="realSw">0. Tap this switch with your finger</label></div>
+<button class="t" id="b1">1. Hidden label kept in the page<small>current app method</small></button>
+<button class="t" id="b2">2. New hidden label in head, clicked, removed</button>
+<button class="t" id="b3">3. Nearly invisible switch on screen, switch.click()</button>
+<button class="t" id="b4">4. Nearly invisible label + switch on screen, label.click()</button>
+<button class="t" id="b5">5. Method 2 on touchend instead of click</button>
+<button class="t" id="b6">6. Method 3 with pointerdown blocked (like the app keys)</button>
+<div id="ua"></div>
+<script>
+  document.getElementById('ua').textContent = navigator.userAgent + (navigator.standalone ? ' · standalone' : '');
+  function sw() { var i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); return i; }
+  var l1 = document.createElement('label'); l1.style.display = 'none'; l1.appendChild(sw()); document.body.appendChild(l1);
+  function m2() { var l = document.createElement('label'); l.setAttribute('aria-hidden', 'true'); l.style.display = 'none'; l.appendChild(sw()); document.head.appendChild(l); l.click(); document.head.removeChild(l); }
+  var s3 = sw(); s3.className = 'probe'; s3.tabIndex = -1; document.body.appendChild(s3);
+  var l4 = document.createElement('label'); l4.className = 'probe'; var s4 = sw(); s4.tabIndex = -1; l4.appendChild(s4); document.body.appendChild(l4);
+  function on(id, ev, fn) { document.getElementById(id).addEventListener(ev, fn); }
+  on('b1', 'click', function () { l1.click(); });
+  on('b2', 'click', m2);
+  on('b3', 'click', function () { s3.click(); });
+  on('b4', 'click', function () { l4.click(); });
+  on('b5', 'touchend', function (e) { e.preventDefault(); m2(); });
+  on('b6', 'pointerdown', function (e) { e.preventDefault(); });
+  on('b6', 'click', function () { s3.click(); });
+</script>
+</body>
+</html>
